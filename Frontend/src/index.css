@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-[#0b0e11] text-[#eef3f8] antialiased select-none;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+
+  /* Custom dark scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0b0e11;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #2a333d;
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3b4653;
+  }
+}
+
+/* React Flow Custom Theme Overrides */
+.react-flow__handle {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.react-flow__handle:hover {
+  transform: scale(1.3);
+  box-shadow: 0 0 8px rgba(125, 140, 255, 0.8);
+}
+
+.react-flow__edge-path {
+  stroke: #7d8cff !important;
+  stroke-width: 2px !important;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #ffffff !important;
+  stroke-width: 3px !important;
+}
+
+.react-flow__attribution {
+  display: none !important;
+}
