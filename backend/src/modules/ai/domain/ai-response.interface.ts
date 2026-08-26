@@ -9,5 +9,5 @@ export interface AiImageResponse {
   width: number;
   height: number;
   seed?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

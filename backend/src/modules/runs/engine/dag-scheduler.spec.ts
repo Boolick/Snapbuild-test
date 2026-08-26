@@ -1,5 +1,7 @@
 import { DagScheduler } from './dag-scheduler';
 import { NodeType } from '../../workflows/domain/port-type.enum';
+import { Workflow } from '../../workflows/domain/workflow.entity';
+import { WorkflowEdge } from '../../workflows/domain/edge.entity';
 
 describe('DagScheduler', () => {
   it('should schedule parallel branches in the same execution wave', () => {
@@ -23,7 +25,7 @@ describe('DagScheduler', () => {
       ],
     };
 
-    const waves = DagScheduler.buildExecutionWaves(graph as any);
+    const waves = DagScheduler.buildExecutionWaves(graph as unknown as Workflow);
 
     expect(waves).toHaveLength(3);
     expect(waves[0]).toEqual(['prompt']);
@@ -41,10 +43,18 @@ describe('DagScheduler', () => {
       { id: 'e4', source: 'gen-b', target: 'res-b' },
     ];
 
-    const downstreamA = DagScheduler.getDownstreamNodeIds('gen-a', edges as any);
+    const downstreamA = DagScheduler.getDownstreamNodeIds(
+      'gen-a',
+      edges as unknown as WorkflowEdge[],
+    );
     expect(Array.from(downstreamA)).toEqual(['res-a']);
 
-    const downstreamPrompt = DagScheduler.getDownstreamNodeIds('prompt', edges as any);
-    expect(Array.from(downstreamPrompt).sort()).toEqual(['gen-a', 'gen-b', 'res-a', 'res-b'].sort());
+    const downstreamPrompt = DagScheduler.getDownstreamNodeIds(
+      'prompt',
+      edges as unknown as WorkflowEdge[],
+    );
+    expect(Array.from(downstreamPrompt).sort()).toEqual(
+      ['gen-a', 'gen-b', 'res-a', 'res-b'].sort(),
+    );
   });
 });

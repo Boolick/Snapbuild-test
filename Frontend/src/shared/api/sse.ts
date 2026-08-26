@@ -4,7 +4,7 @@ import { RunEventMessage } from '../types/api';
 export interface SseSubscriptionOptions {
   runId: string;
   onEvent: (event: RunEventMessage) => void;
-  onError?: (error: any) => void;
+  onError?: (error: unknown) => void;
   onComplete?: () => void;
 }
 

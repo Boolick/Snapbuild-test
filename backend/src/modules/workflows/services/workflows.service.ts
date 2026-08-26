@@ -1,8 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Workflow } from '../domain/workflow.entity';
 import { NodeType } from '../domain/port-type.enum';
-import { CreateWorkflowDto } from '../dto/create-workflow.dto';
-import { generateId } from '../../../common/utils/id-generator.util';
 
 @Injectable()
 export class WorkflowsService {
@@ -139,7 +137,8 @@ export class WorkflowsService {
     const scenario3 = new Workflow({
       id: 'template-scenario-3',
       name: 'Scenario 3: Parallel Branching (Mandatory)',
-      description: 'Single prompt branching concurrently into two different AI generators and results',
+      description:
+        'Single prompt branching concurrently into two different AI generators and results',
       nodes: [
         {
           id: 'prompt-branch-1',

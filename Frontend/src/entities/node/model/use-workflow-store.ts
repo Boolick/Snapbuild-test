@@ -8,28 +8,31 @@ import {
   applyNodeChanges,
 } from '@xyflow/react';
 import { CustomNodeType, CustomEdgeType } from './types';
-import { NodeType, JobStatus, WorkflowTemplate, CanvasNode } from '../../../shared/types/graph';
+import {
+  NodeType,
+  JobStatus,
+  WorkflowTemplate,
+  CanvasNode,
+  NodeJobOutput,
+} from '../../../shared/types/graph';
 import { Preset, WorkflowRunSnapshot } from '../../../shared/types/api';
 import { validateConnection } from '../../../shared/lib/graph/port-validator';
+import { DEFAULT_NODE_POSITIONS, INITIAL_NODE_DATA } from './initial-node-data';
 
 interface WorkflowState {
-  // Graph State
   nodes: CustomNodeType[];
   edges: CustomEdgeType[];
   selectedNodeId: string | null;
 
-  // Run & Execution State
   activeRunId: string | null;
   activeRun: WorkflowRunSnapshot | null;
   isExecuting: boolean;
   validationError: string | null;
 
-  // Presets
   presets: Preset[];
   isPresetDrawerOpen: boolean;
   targetPresetNodeId: string | null;
 
-  // Actions
   setNodes: (nodes: CustomNodeType[]) => void;
   setEdges: (edges: CustomEdgeType[]) => void;
   onNodesChange: (changes: NodeChange<CustomNodeType>[]) => void;
@@ -37,7 +40,7 @@ interface WorkflowState {
   onConnect: (connection: Connection) => boolean;
 
   addNode: (type: NodeType, position?: { x: number; y: number }) => string;
-  updateNodeData: (id: string, data: Record<string, any>) => void;
+  updateNodeData: (id: string, data: Record<string, unknown>) => void;
   deleteNode: (id: string) => void;
   deleteEdge: (id: string) => void;
   setSelectedNodeId: (id: string | null) => void;
@@ -45,13 +48,11 @@ interface WorkflowState {
   loadTemplate: (template: WorkflowTemplate) => void;
   clearGraph: () => void;
 
-  // Presets actions
   setPresets: (presets: Preset[]) => void;
   openPresetDrawer: (nodeId?: string) => void;
   closePresetDrawer: () => void;
   applyPresetToNode: (nodeId: string, preset: Preset) => void;
 
-  // Execution actions
   setActiveRunId: (runId: string | null) => void;
   setActiveRun: (run: WorkflowRunSnapshot | null) => void;
   setIsExecuting: (isExecuting: boolean) => void;
@@ -59,7 +60,7 @@ interface WorkflowState {
   updateNodeJob: (
     nodeId: string,
     status: JobStatus,
-    output?: Record<string, any>,
+    output?: NodeJobOutput,
     error?: string,
     durationMs?: number,
   ) => void;
@@ -104,7 +105,6 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       return false;
     }
 
-    // Validate Port Typing (text <-> text, image <-> image)
     const validation = validateConnection(
       sourceNode as unknown as CanvasNode,
       connection.sourceHandle,
@@ -123,7 +123,10 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         {
           ...connection,
           animated: true,
-          style: { stroke: validation.sourceType === 'image' ? '#a78bfa' : '#60a5fa', strokeWidth: 2 },
+          style: {
+            stroke: validation.sourceType === 'image' ? '#a78bfa' : '#60a5fa',
+            strokeWidth: 2,
+          },
         },
         edges,
       ),
@@ -135,47 +138,11 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   addNode: (type: NodeType, position) => {
     const id = `${type}-${Date.now().toString(36)}`;
-    const defaultPositions: Record<NodeType, { x: number; y: number }> = {
-      [NodeType.PROMPT]: { x: 100, y: 150 },
-      [NodeType.IMAGE_INPUT]: { x: 100, y: 350 },
-      [NodeType.GENERATE_IMAGE]: { x: 450, y: 150 },
-      [NodeType.EDIT_IMAGE]: { x: 450, y: 350 },
-      [NodeType.RESULT]: { x: 800, y: 250 },
-    };
-
-    const initialData: Record<NodeType, Record<string, any>> = {
-      [NodeType.PROMPT]: {
-        label: 'Prompt Input',
-        prompt: 'A futuristic city bathed in radiant holographic light',
-        jobStatus: JobStatus.IDLE,
-      },
-      [NodeType.IMAGE_INPUT]: {
-        label: 'Image Input',
-        imageUrl: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800',
-        jobStatus: JobStatus.IDLE,
-      },
-      [NodeType.GENERATE_IMAGE]: {
-        label: 'AI Generator',
-        presetId: 'preset-premium-3d',
-        aspectRatio: '1:1',
-        jobStatus: JobStatus.IDLE,
-      },
-      [NodeType.EDIT_IMAGE]: {
-        label: 'AI Image Editor',
-        strength: 0.75,
-        jobStatus: JobStatus.IDLE,
-      },
-      [NodeType.RESULT]: {
-        label: 'Result Preview',
-        jobStatus: JobStatus.IDLE,
-      },
-    };
-
     const newNode: CustomNodeType = {
       id,
       type,
-      position: position || defaultPositions[type] || { x: 250, y: 250 },
-      data: initialData[type] || { label: type, jobStatus: JobStatus.IDLE },
+      position: position || DEFAULT_NODE_POSITIONS[type] || { x: 250, y: 250 },
+      data: { ...(INITIAL_NODE_DATA[type] || { label: type, jobStatus: JobStatus.IDLE }) },
     };
 
     set((state) => ({
@@ -261,8 +228,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   openPresetDrawer: (nodeId) =>
     set({ isPresetDrawerOpen: true, targetPresetNodeId: nodeId || null }),
 
-  closePresetDrawer: () =>
-    set({ isPresetDrawerOpen: false, targetPresetNodeId: null }),
+  closePresetDrawer: () => set({ isPresetDrawerOpen: false, targetPresetNodeId: null }),
 
   applyPresetToNode: (nodeId, preset) => {
     get().updateNodeData(nodeId, {

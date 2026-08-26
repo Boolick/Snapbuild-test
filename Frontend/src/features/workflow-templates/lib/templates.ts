@@ -119,7 +119,8 @@ export const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
   {
     id: 'template-scenario-3',
     name: 'Scenario 3: Parallel Branching (Mandatory)',
-    description: '[ Prompt ] ──┬→ [ Generate A ] → [ Result A ]\n            └→ [ Generate B ] → [ Result B ]',
+    description:
+      '[ Prompt ] ──┬→ [ Generate A ] → [ Result A ]\n            └→ [ Generate B ] → [ Result B ]',
     nodes: [
       {
         id: 'prompt-branch-1',
@@ -127,7 +128,8 @@ export const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
         position: { x: 80, y: 280 },
         data: {
           label: 'Shared Master Prompt',
-          prompt: 'An electric hypercar speeding through a rainy metropolis at night with volumetric reflections',
+          prompt:
+            'An electric hypercar speeding through a rainy metropolis at night with volumetric reflections',
         },
       },
       // Branch A

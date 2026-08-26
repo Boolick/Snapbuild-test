@@ -9,11 +9,7 @@ import { runApi } from '../../run/api/run-api';
 import { Sparkles, Wand2, Layers } from 'lucide-react';
 import { cn } from '../../../shared/lib/utils/cn';
 
-export const GenerateImageNode: React.FC<NodeProps<CustomNodeType>> = ({
-  id,
-  data,
-  selected,
-}) => {
+export const GenerateImageNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, selected }) => {
   const updateNodeData = useWorkflowStore((s) => s.updateNodeData);
   const openPresetDrawer = useWorkflowStore((s) => s.openPresetDrawer);
   const presets = useWorkflowStore((s) => s.presets);
@@ -26,7 +22,9 @@ export const GenerateImageNode: React.FC<NodeProps<CustomNodeType>> = ({
   const aspectRatios = ['1:1', '16:9', '9:16', '4:3'] as const;
 
   const handleRetry = async () => {
-    if (!activeRunId) return;
+    if (!activeRunId) {
+      return;
+    }
     try {
       await runApi.retryNode(activeRunId, id);
     } catch (err) {
@@ -91,9 +89,7 @@ export const GenerateImageNode: React.FC<NodeProps<CustomNodeType>> = ({
 
         {/* Aspect Ratio Selector */}
         <div>
-          <span className="text-[11px] font-medium text-text-muted mb-1.5 block">
-            Aspect Ratio
-          </span>
+          <span className="text-[11px] font-medium text-text-muted mb-1.5 block">Aspect Ratio</span>
           <div className="grid grid-cols-4 gap-1">
             {aspectRatios.map((ratio) => (
               <button

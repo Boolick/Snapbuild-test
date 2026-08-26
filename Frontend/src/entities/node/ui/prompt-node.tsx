@@ -8,11 +8,7 @@ import { useWorkflowStore } from '../model/use-workflow-store';
 import { CustomNodeType } from '../model/types';
 import { Type } from 'lucide-react';
 
-export const PromptNode: React.FC<NodeProps<CustomNodeType>> = ({
-  id,
-  data,
-  selected,
-}) => {
+export const PromptNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, selected }) => {
   const updateNodeData = useWorkflowStore((s) => s.updateNodeData);
   const schema = NODE_SCHEMAS[NodeType.PROMPT];
   const promptText = data.prompt || '';

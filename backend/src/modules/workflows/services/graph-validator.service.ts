@@ -4,7 +4,7 @@ import {
   ValidateGraphResponseDto,
   ValidationErrorDetail,
 } from '../dto/validate-graph.dto';
-import { NODE_SCHEMAS, NodeType, PortType } from '../domain/port-type.enum';
+import { NODE_SCHEMAS, NodeType } from '../domain/port-type.enum';
 
 @Injectable()
 export class GraphValidatorService {
@@ -106,9 +106,7 @@ export class GraphValidatorService {
 
     // Kahn's algorithm with wave grouping for parallel execution preview
     const executionWaves: string[][] = [];
-    let currentWave = graph.nodes
-      .filter((n) => inDegree.get(n.id) === 0)
-      .map((n) => n.id);
+    let currentWave = graph.nodes.filter((n) => inDegree.get(n.id) === 0).map((n) => n.id);
 
     let processedCount = 0;
 

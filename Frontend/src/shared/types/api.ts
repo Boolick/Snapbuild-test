@@ -1,4 +1,4 @@
-import { JobStatus, WorkflowRunStatus } from './graph';
+import { JobStatus, WorkflowRunStatus, NodeJobOutput } from './graph';
 
 export interface Preset {
   id: string;
@@ -23,8 +23,8 @@ export interface NodeJobStatus {
   startedAt?: string;
   completedAt?: string;
   durationMs?: number;
-  inputs?: Record<string, any>;
-  outputs?: Record<string, any>;
+  inputs?: Record<string, unknown>;
+  outputs?: NodeJobOutput;
   error?: string;
   retryCount: number;
 }
@@ -59,7 +59,7 @@ export interface RunEventMessage {
   status?: JobStatus | WorkflowRunStatus;
   progress?: number;
   message?: string;
-  data?: any;
+  data?: NodeJobOutput;
 }
 
 export interface GraphValidationError {

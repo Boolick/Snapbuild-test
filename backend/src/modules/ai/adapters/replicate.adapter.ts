@@ -1,10 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { ImageGenerationProvider } from '../ports/ai-provider.interface';
-import {
-  AiImageGenerationRequest,
-  AiImageEditRequest,
-} from '../domain/ai-request.interface';
+import { AiImageGenerationRequest, AiImageEditRequest } from '../domain/ai-request.interface';
 import { AiImageResponse } from '../domain/ai-response.interface';
 
 @Injectable()
@@ -14,9 +11,7 @@ export class ReplicateAdapter implements ImageGenerationProvider {
 
   constructor(private readonly apiToken?: string) {}
 
-  async generateImage(
-    request: AiImageGenerationRequest,
-  ): Promise<AiImageResponse> {
+  async generateImage(request: AiImageGenerationRequest): Promise<AiImageResponse> {
     if (!this.apiToken) {
       throw new Error('Replicate API Token is missing');
     }
@@ -60,11 +55,13 @@ export class ReplicateAdapter implements ImageGenerationProvider {
         width: 1024,
         height: 1024,
       };
-    } catch (error: any) {
-      const errorMsg =
-        error.response?.data?.detail ||
-        error.message ||
-        'Replicate generation failed';
+    } catch (error: unknown) {
+      let errorMsg = 'Replicate generation failed';
+      if (axios.isAxiosError(error)) {
+        errorMsg = error.response?.data?.detail || error.message;
+      } else if (error instanceof Error) {
+        errorMsg = error.message;
+      }
       throw new Error(`Replicate Error: ${errorMsg}`);
     }
   }

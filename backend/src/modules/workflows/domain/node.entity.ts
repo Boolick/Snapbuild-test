@@ -15,7 +15,7 @@ export interface NodeDataPayload {
   cfgScale?: number;
   steps?: number;
   strength?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export class WorkflowNode {

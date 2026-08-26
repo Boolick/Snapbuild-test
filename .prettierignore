@@ -1,0 +1,9 @@
+node_modules/
+dist/
+build/
+coverage/
+.planning/
+.gemini/
+graphify-out/
+*.tsbuildinfo
+package-lock.json

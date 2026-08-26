@@ -7,8 +7,8 @@ export class NodeJob {
   startedAt?: string;
   completedAt?: string;
   durationMs?: number;
-  inputs?: Record<string, any>;
-  outputs?: Record<string, any>;
+  inputs?: Record<string, unknown>;
+  outputs?: Record<string, unknown>;
   error?: string;
   retryCount: number;
 

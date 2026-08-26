@@ -20,9 +20,7 @@ export const CanvasToolbar: React.FC = () => {
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-sm font-bold text-text tracking-tight">
-              AI Image Workflow Mini
-            </h1>
+            <h1 className="text-sm font-bold text-text tracking-tight">AI Image Workflow Mini</h1>
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-brand/10 text-brand border border-brand/30">
               FSD v2.1
             </span>

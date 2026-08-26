@@ -8,11 +8,7 @@ import { useWorkflowStore } from '../model/use-workflow-store';
 import { CustomNodeType } from '../model/types';
 import { Image as ImageIcon, ExternalLink } from 'lucide-react';
 
-export const ImageInputNode: React.FC<NodeProps<CustomNodeType>> = ({
-  id,
-  data,
-  selected,
-}) => {
+export const ImageInputNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, selected }) => {
   const updateNodeData = useWorkflowStore((s) => s.updateNodeData);
   const schema = NODE_SCHEMAS[NodeType.IMAGE_INPUT];
   const imageUrl = data.imageUrl || '';
@@ -20,7 +16,10 @@ export const ImageInputNode: React.FC<NodeProps<CustomNodeType>> = ({
   const sampleImages = [
     { label: 'Cat', url: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800' },
     { label: 'City', url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800' },
-    { label: 'Portrait', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800' },
+    {
+      label: 'Portrait',
+      url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800',
+    },
   ];
 
   return (

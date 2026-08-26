@@ -1,9 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ImageGenerationProvider } from '../ports/ai-provider.interface';
-import {
-  AiImageGenerationRequest,
-  AiImageEditRequest,
-} from '../domain/ai-request.interface';
+import { AiImageGenerationRequest, AiImageEditRequest } from '../domain/ai-request.interface';
 import { AiImageResponse } from '../domain/ai-response.interface';
 
 @Injectable()
@@ -42,11 +39,9 @@ export class MockAiAdapter implements ImageGenerationProvider {
     },
   ];
 
-  async generateImage(
-    request: AiImageGenerationRequest,
-  ): Promise<AiImageResponse> {
+  async generateImage(request: AiImageGenerationRequest): Promise<AiImageResponse> {
     const startTime = Date.now();
-    const delay = request.metadata?.delayMs || 1500;
+    const delay = typeof request.metadata?.delayMs === 'number' ? request.metadata.delayMs : 1500;
 
     this.logger.log(
       `[Mock AI] Starting generation for prompt: "${request.prompt}" (Simulated delay: ${delay}ms)`,
@@ -64,6 +59,7 @@ export class MockAiAdapter implements ImageGenerationProvider {
 
     const imageUrl = this.resolveImageUrl(request.prompt, request.aspectRatio);
     const duration = Date.now() - startTime;
+    const { width, height } = this.resolveDimensions(request.aspectRatio);
 
     return {
       imageUrl,
@@ -73,13 +69,8 @@ export class MockAiAdapter implements ImageGenerationProvider {
       provider: this.providerName,
       model: 'mock-diffusion-v2.5',
       generationDurationMs: duration,
-      width: request.aspectRatio === '16:9' ? 1024 : 768,
-      height:
-        request.aspectRatio === '16:9'
-          ? 576
-          : request.aspectRatio === '9:16'
-            ? 1024
-            : 768,
+      width,
+      height,
       seed: request.seed || Math.floor(Math.random() * 1000000),
       metadata: {
         presetId: request.metadata?.presetId,
@@ -89,9 +80,22 @@ export class MockAiAdapter implements ImageGenerationProvider {
     };
   }
 
+  private resolveDimensions(aspectRatio?: string): { width: number; height: number } {
+    if (aspectRatio === '16:9') {
+      return { width: 1024, height: 576 };
+    }
+    if (aspectRatio === '9:16') {
+      return { width: 576, height: 1024 };
+    }
+    if (aspectRatio === '4:3') {
+      return { width: 1024, height: 768 };
+    }
+    return { width: 768, height: 768 };
+  }
+
   async editImage(request: AiImageEditRequest): Promise<AiImageResponse> {
     const startTime = Date.now();
-    const delay = request.metadata?.delayMs || 1800;
+    const delay = typeof request.metadata?.delayMs === 'number' ? request.metadata.delayMs : 1800;
 
     this.logger.log(
       `[Mock AI] Starting image edit for prompt: "${request.prompt}" on source: ${request.inputImageUrl}`,
@@ -99,18 +103,13 @@ export class MockAiAdapter implements ImageGenerationProvider {
 
     if (request.prompt.toLowerCase().includes('#fail')) {
       await this.sleep(800);
-      throw new Error(
-        'Simulated AI Image Edit Failure: Inpainting model crashed.',
-      );
+      throw new Error('Simulated AI Image Edit Failure: Inpainting model crashed.');
     }
 
     await this.sleep(delay);
 
     // Provide a modified variant or styled result
-    const imageUrl = this.resolveImageUrl(
-      `edited ${request.prompt}`,
-      '1:1',
-    );
+    const imageUrl = this.resolveImageUrl(`edited ${request.prompt}`, '1:1');
     const duration = Date.now() - startTime;
 
     return {
@@ -129,7 +128,7 @@ export class MockAiAdapter implements ImageGenerationProvider {
     };
   }
 
-  private resolveImageUrl(prompt: string, aspectRatio?: string): string {
+  private resolveImageUrl(prompt: string, _aspectRatio?: string): string {
     const lower = prompt.toLowerCase();
 
     for (const item of this.curatedGallery) {

@@ -30,9 +30,7 @@ export class DagScheduler {
     }
 
     const waves: string[][] = [];
-    let currentWave = graph.nodes
-      .filter((n) => (inDegree.get(n.id) || 0) === 0)
-      .map((n) => n.id);
+    let currentWave = graph.nodes.filter((n) => (inDegree.get(n.id) || 0) === 0).map((n) => n.id);
 
     const visited = new Set<string>();
 

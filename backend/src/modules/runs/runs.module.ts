@@ -11,12 +11,7 @@ import { AiModule } from '../ai/ai.module';
 @Module({
   imports: [WorkflowsModule, PresetsModule, AiModule],
   controllers: [RunsController],
-  providers: [
-    RunsService,
-    GraphExecutionEngine,
-    RunEventsService,
-    NodeExecutor,
-  ],
+  providers: [RunsService, GraphExecutionEngine, RunEventsService, NodeExecutor],
   exports: [RunsService, GraphExecutionEngine, RunEventsService],
 })
 export class RunsModule {}

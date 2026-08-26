@@ -9,7 +9,7 @@ export interface AiImageGenerationRequest {
   steps?: number;
   cfgScale?: number;
   style?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AiImageEditRequest {
@@ -18,5 +18,5 @@ export interface AiImageEditRequest {
   negativePrompt?: string;
   strength?: number;
   maskImageUrl?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

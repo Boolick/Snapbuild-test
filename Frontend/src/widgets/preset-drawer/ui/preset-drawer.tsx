@@ -16,7 +16,9 @@ export const PresetDrawer: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPreset, setSelectedPreset] = useState<Preset | null>(null);
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   const targetNode = nodes.find((n) => n.id === targetNodeId);
 
@@ -71,10 +73,7 @@ export const PresetDrawer: React.FC = () => {
         {/* Search input */}
         <div className="p-4 border-b border-border bg-panel-subtle/30">
           <div className="relative">
-            <Search
-              size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim"
-            />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" />
             <input
               type="text"
               value={searchQuery}
@@ -97,8 +96,7 @@ export const PresetDrawer: React.FC = () => {
                 key={preset.id}
                 preset={preset}
                 isSelected={
-                  selectedPreset?.id === preset.id ||
-                  targetNode?.data.presetId === preset.id
+                  selectedPreset?.id === preset.id || targetNode?.data.presetId === preset.id
                 }
                 onSelect={(p) => setSelectedPreset(p)}
               />
@@ -109,9 +107,7 @@ export const PresetDrawer: React.FC = () => {
         {/* Footer Actions */}
         <div className="p-4 border-t border-border bg-panel-subtle/50 flex items-center justify-between gap-3">
           <div className="text-xs text-text-dim">
-            {selectedPreset
-              ? `Selected: ${selectedPreset.name}`
-              : 'Choose a preset above'}
+            {selectedPreset ? `Selected: ${selectedPreset.name}` : 'Choose a preset above'}
           </div>
 
           <div className="flex items-center gap-2">
@@ -119,12 +115,7 @@ export const PresetDrawer: React.FC = () => {
               Cancel
             </Button>
             {targetNodeId && (
-              <Button
-                variant="primary"
-                size="sm"
-                disabled={!selectedPreset}
-                onClick={handleApply}
-              >
+              <Button variant="primary" size="sm" disabled={!selectedPreset} onClick={handleApply}>
                 Apply to Node
               </Button>
             )}

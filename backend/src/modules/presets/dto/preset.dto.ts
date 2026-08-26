@@ -1,11 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsArray,
-  IsObject,
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsArray, IsObject } from 'class-validator';
 
 export class PresetDto {
   @ApiProperty({ example: 'preset-premium-3d' })
@@ -31,16 +25,13 @@ export class PresetDto {
   mainPrompt: string;
 
   @ApiProperty({
-    example:
-      'clutter, noisy background, photorealistic human, low resolution, artifacts, blurry',
+    example: 'clutter, noisy background, photorealistic human, low resolution, artifacts, blurry',
   })
   @IsString()
   negativePrompt: string;
 
   @ApiProperty({
-    example: [
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400',
-    ],
+    example: ['https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'],
   })
   @IsArray()
   @IsString({ each: true })
@@ -56,7 +47,7 @@ export class PresetDto {
   @ApiPropertyOptional({ example: { aspectRatio: '1:1', style: '3d-render' } })
   @IsOptional()
   @IsObject()
-  defaultParams?: Record<string, any>;
+  defaultParams?: Record<string, unknown>;
 }
 
 export class CreatePresetDto {
@@ -90,5 +81,5 @@ export class CreatePresetDto {
   @ApiPropertyOptional({ example: { aspectRatio: '16:9' } })
   @IsOptional()
   @IsObject()
-  defaultParams?: Record<string, any>;
+  defaultParams?: Record<string, unknown>;
 }

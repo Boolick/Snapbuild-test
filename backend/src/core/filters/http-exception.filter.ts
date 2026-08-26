@@ -1,11 +1,4 @@
-import {
-  ExceptionFilter,
-  Catch,
-  ArgumentsHost,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ApiErrorResponse } from '../../common/interfaces/api-response.interface';
 
@@ -24,8 +17,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     let error: string | string[] | undefined;
 
     if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
-      const resObj = exceptionResponse as Record<string, any>;
-      message = resObj.message || message;
+      const resObj = exceptionResponse as { message?: string | string[]; error?: string };
+      message =
+        (Array.isArray(resObj.message) ? resObj.message.join(', ') : resObj.message) || message;
       error = resObj.error || undefined;
     }
 

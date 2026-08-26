@@ -1,7 +1,4 @@
-import {
-  AiImageGenerationRequest,
-  AiImageEditRequest,
-} from '../domain/ai-request.interface';
+import { AiImageGenerationRequest, AiImageEditRequest } from '../domain/ai-request.interface';
 import { AiImageResponse } from '../domain/ai-response.interface';
 
 export interface ImageGenerationProvider {

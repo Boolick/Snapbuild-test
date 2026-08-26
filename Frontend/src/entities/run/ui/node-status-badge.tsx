@@ -20,7 +20,9 @@ export const NodeStatusBadge: React.FC<NodeStatusBadgeProps> = ({
   }
 
   const formatDuration = (ms?: number) => {
-    if (!ms) return '';
+    if (!ms) {
+      return '';
+    }
     return ms > 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`;
   };
 
@@ -59,9 +61,7 @@ export const NodeStatusBadge: React.FC<NodeStatusBadgeProps> = ({
         >
           <CheckCircle2 size={11} /> Ready
           {durationMs && (
-            <span className="text-[10px] opacity-70 ml-0.5">
-              ({formatDuration(durationMs)})
-            </span>
+            <span className="text-[10px] opacity-70 ml-0.5">({formatDuration(durationMs)})</span>
           )}
         </span>
       );

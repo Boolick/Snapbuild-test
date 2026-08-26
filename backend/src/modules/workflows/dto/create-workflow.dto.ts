@@ -35,7 +35,7 @@ export class WorkflowNodeDto {
 
   @ApiProperty({ example: { prompt: 'A futuristic city' } })
   @IsObject()
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 export class WorkflowEdgeDto {

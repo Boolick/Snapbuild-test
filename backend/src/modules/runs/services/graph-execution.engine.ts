@@ -20,7 +20,7 @@ export class GraphExecutionEngine {
    */
   async executeRun(
     run: WorkflowRun,
-    nodeDataOverrides?: Record<string, any>,
+    nodeDataOverrides?: Record<string, Record<string, unknown>>,
     startFromWaves?: string[][],
   ): Promise<WorkflowRun> {
     const startTime = Date.now();
@@ -35,9 +35,7 @@ export class GraphExecutionEngine {
       message: `Workflow execution started for run ${run.id}`,
     });
 
-    const nodeMap = new Map<string, WorkflowNode>(
-      run.graph.nodes.map((n) => [n.id, n]),
-    );
+    const nodeMap = new Map<string, WorkflowNode>(run.graph.nodes.map((n) => [n.id, n]));
     const waves = startFromWaves || run.executionWaves;
 
     this.logger.log(
@@ -110,18 +108,17 @@ export class GraphExecutionEngine {
           });
 
           return { nodeId, success: true, outputs: result.outputs };
-        } catch (error: any) {
+        } catch (error: unknown) {
           const nodeDuration = Date.now() - nodeStartTime;
-          const errorMessage = error.message || 'Unknown node execution failure';
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown node execution failure';
 
           job.status = JobStatus.ERROR;
           job.completedAt = new Date().toISOString();
           job.durationMs = nodeDuration;
           job.error = errorMessage;
 
-          this.logger.error(
-            `[Run ${run.id}] Node "${nodeId}" failed: ${errorMessage}`,
-          );
+          this.logger.error(`[Run ${run.id}] Node "${nodeId}" failed: ${errorMessage}`);
 
           this.eventsService.emit({
             runId: run.id,
@@ -182,14 +179,9 @@ export class GraphExecutionEngine {
   /**
    * Collects outputs from upstream connected nodes through incoming edges.
    */
-  private resolveUpstreamInputs(
-    targetNodeId: string,
-    run: WorkflowRun,
-  ): Record<string, any> {
-    const incomingEdges = run.graph.edges.filter(
-      (e) => e.target === targetNodeId,
-    );
-    const resolvedInputs: Record<string, any> = {};
+  private resolveUpstreamInputs(targetNodeId: string, run: WorkflowRun): Record<string, unknown> {
+    const incomingEdges = run.graph.edges.filter((e) => e.target === targetNodeId);
+    const resolvedInputs: Record<string, unknown> = {};
 
     for (const edge of incomingEdges) {
       const sourceJob = run.jobs[edge.source];

@@ -48,8 +48,7 @@ export class PromptRequestBuilder {
       prompt: combinedPrompt,
       negativePrompt: combinedNegativePrompt || undefined,
       references: combinedReferences.length > 0 ? combinedReferences : undefined,
-      aspectRatio:
-        overrides?.aspectRatio || preset?.defaultParams?.aspectRatio || '1:1',
+      aspectRatio: overrides?.aspectRatio || preset?.defaultParams?.aspectRatio || '1:1',
       cfgScale: overrides?.cfgScale || preset?.defaultParams?.cfgScale || 7.0,
       steps: overrides?.steps || preset?.defaultParams?.steps || 30,
       seed: overrides?.seed || preset?.defaultParams?.seed,

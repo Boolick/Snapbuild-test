@@ -1,8 +1,7 @@
 import React from 'react';
 import { cn } from '../lib/utils/cn';
 
-export interface SelectProps
-  extends React.SelectHTMLAttributes<HTMLSelectElement> {
+export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   options: { value: string; label: string }[];
 }
 

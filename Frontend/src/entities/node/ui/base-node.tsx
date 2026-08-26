@@ -21,6 +21,19 @@ export interface BaseNodeProps {
   children: React.ReactNode;
 }
 
+const getStatusAccentColor = (jobStatus?: JobStatus, defaultAccentColor?: string): string => {
+  switch (jobStatus) {
+    case JobStatus.RUNNING:
+      return '#3b82f6';
+    case JobStatus.ERROR:
+      return '#ef4444';
+    case JobStatus.SUCCESS:
+      return '#10b981';
+    default:
+      return defaultAccentColor || '#6366f1';
+  }
+};
+
 export const BaseNode: React.FC<BaseNodeProps> = ({
   id,
   title,
@@ -53,30 +66,20 @@ export const BaseNode: React.FC<BaseNodeProps> = ({
         jobStatus === JobStatus.RUNNING &&
           'border-blue-500/80 shadow-blue-500/20 shadow-2xl ring-1 ring-blue-400 animate-pulse-glow',
         jobStatus === JobStatus.SUCCESS && 'border-emerald-600/50',
-        jobStatus === JobStatus.ERROR && 'border-rose-600/80 shadow-rose-500/20 shadow-xl ring-1 ring-rose-500/50',
+        jobStatus === JobStatus.ERROR &&
+          'border-rose-600/80 shadow-rose-500/20 shadow-xl ring-1 ring-rose-500/50',
       )}
     >
       {/* Accent color top border */}
       <div
         className="h-1 w-full rounded-t-xl"
-        style={{
-          backgroundColor:
-            jobStatus === JobStatus.RUNNING
-              ? '#3b82f6'
-              : jobStatus === JobStatus.ERROR
-                ? '#ef4444'
-                : jobStatus === JobStatus.SUCCESS
-                  ? '#10b981'
-                  : accentColor,
-        }}
+        style={{ backgroundColor: getStatusAccentColor(jobStatus, accentColor) }}
       />
 
       {/* Target (Input) Handles */}
       {inputs.map((port, index) => {
         const topPercent =
-          inputs.length === 1
-            ? '50%'
-            : `${((index + 1) / (inputs.length + 1)) * 100}%`;
+          inputs.length === 1 ? '50%' : `${((index + 1) / (inputs.length + 1)) * 100}%`;
 
         return (
           <div
@@ -105,9 +108,7 @@ export const BaseNode: React.FC<BaseNodeProps> = ({
       {/* Source (Output) Handles */}
       {outputs.map((port, index) => {
         const topPercent =
-          outputs.length === 1
-            ? '50%'
-            : `${((index + 1) / (outputs.length + 1)) * 100}%`;
+          outputs.length === 1 ? '50%' : `${((index + 1) / (outputs.length + 1)) * 100}%`;
 
         return (
           <div
@@ -142,9 +143,7 @@ export const BaseNode: React.FC<BaseNodeProps> = ({
           >
             {icon}
           </div>
-          <h3 className="text-xs font-bold text-text truncate tracking-wide">
-            {title}
-          </h3>
+          <h3 className="text-xs font-bold text-text truncate tracking-wide">{title}</h3>
         </div>
 
         <div className="flex items-center gap-1.5">

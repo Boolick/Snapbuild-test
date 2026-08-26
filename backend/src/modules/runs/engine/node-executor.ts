@@ -7,13 +7,13 @@ import { PromptRequestBuilder } from '../../ai/domain/prompt-builder';
 
 export interface NodeExecutionInput {
   node: WorkflowNode;
-  resolvedInputs: Record<string, any>;
-  dataOverrides?: Record<string, any>;
+  resolvedInputs: Record<string, unknown>;
+  dataOverrides?: Record<string, unknown>;
 }
 
 export interface NodeExecutionOutput {
-  outputs: Record<string, any>;
-  metadata?: Record<string, any>;
+  outputs: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
 }
 
 @Injectable()
@@ -53,10 +53,10 @@ export class NodeExecutor {
   }
 
   private async executePromptNode(
-    data: Record<string, any>,
-    resolvedInputs: Record<string, any>,
+    data: Record<string, unknown>,
+    _resolvedInputs: Record<string, unknown>,
   ): Promise<NodeExecutionOutput> {
-    const promptText = (data.prompt || '').trim();
+    const promptText = typeof data.prompt === 'string' ? data.prompt.trim() : '';
     return {
       outputs: {
         text: promptText,
@@ -69,11 +69,11 @@ export class NodeExecutor {
   }
 
   private async executeImageInputNode(
-    data: Record<string, any>,
-    resolvedInputs: Record<string, any>,
+    data: Record<string, unknown>,
+    _resolvedInputs: Record<string, unknown>,
   ): Promise<NodeExecutionOutput> {
     const imageUrl =
-      data.imageUrl ||
+      (typeof data.imageUrl === 'string' && data.imageUrl) ||
       'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800';
 
     return {
@@ -85,44 +85,49 @@ export class NodeExecutor {
   }
 
   private async executeGenerateImageNode(
-    data: Record<string, any>,
-    resolvedInputs: Record<string, any>,
+    data: Record<string, unknown>,
+    resolvedInputs: Record<string, unknown>,
   ): Promise<NodeExecutionOutput> {
     // 1. Resolve prompt text: pull from upstream connected input or fallback to node's own prompt
     let userPrompt = '';
-    if (resolvedInputs['text-in']) {
-      userPrompt =
-        typeof resolvedInputs['text-in'] === 'string'
-          ? resolvedInputs['text-in']
-          : resolvedInputs['text-in'].text || '';
-    } else if (resolvedInputs.text) {
-      userPrompt = resolvedInputs.text;
-    } else if (data.prompt) {
+    const textIn = resolvedInputs['text-in'];
+    const textVal = resolvedInputs.text;
+
+    if (typeof textIn === 'string') {
+      userPrompt = textIn;
+    } else if (typeof textIn === 'object' && textIn !== null && 'text' in textIn) {
+      userPrompt = String((textIn as Record<string, unknown>).text || '');
+    } else if (typeof textVal === 'string') {
+      userPrompt = textVal;
+    } else if (typeof data.prompt === 'string') {
       userPrompt = data.prompt;
     }
 
     // 2. Resolve Preset entity if specified
-    const presetId = data.presetId;
+    const presetId = typeof data.presetId === 'string' ? data.presetId : undefined;
     let preset = undefined;
     if (presetId) {
       try {
         preset = this.presetsService.findById(presetId);
-      } catch (err) {
+      } catch {
         this.logger.warn(`Preset ${presetId} not found, proceeding without preset.`);
       }
     }
 
     // 3. Request Builder: merges user prompt with Preset rules & references
-    const aiRequest = PromptRequestBuilder.buildRequest(userPrompt, preset, {
-      aspectRatio: data.aspectRatio,
-      style: data.style,
-      cfgScale: data.cfgScale,
-      steps: data.steps,
-      seed: data.seed,
+    const request = PromptRequestBuilder.buildRequest(userPrompt, preset, {
+      aspectRatio:
+        typeof data.aspectRatio === 'string'
+          ? (data.aspectRatio as '1:1' | '16:9' | '9:16' | '4:3')
+          : undefined,
+      style: typeof data.style === 'string' ? data.style : undefined,
+      cfgScale: typeof data.cfgScale === 'number' ? data.cfgScale : undefined,
+      steps: typeof data.steps === 'number' ? data.steps : undefined,
+      seed: typeof data.seed === 'number' ? data.seed : undefined,
     });
 
     // 4. Invoke AI Gateway (OpenAI / Stability / Replicate / Mock)
-    const aiResponse = await this.aiGateway.generateImage(aiRequest);
+    const aiResponse = await this.aiGateway.generateImage(request);
 
     return {
       outputs: {
@@ -142,17 +147,17 @@ export class NodeExecutor {
   }
 
   private async executeEditImageNode(
-    data: Record<string, any>,
-    resolvedInputs: Record<string, any>,
+    data: Record<string, unknown>,
+    resolvedInputs: Record<string, unknown>,
   ): Promise<NodeExecutionOutput> {
     // 1. Resolve source image
     let sourceImageUrl = '';
-    if (resolvedInputs['image-in']) {
-      sourceImageUrl =
-        typeof resolvedInputs['image-in'] === 'string'
-          ? resolvedInputs['image-in']
-          : resolvedInputs['image-in'].imageUrl || '';
-    } else if (data.imageUrl) {
+    const imageIn = resolvedInputs['image-in'];
+    if (typeof imageIn === 'string') {
+      sourceImageUrl = imageIn;
+    } else if (typeof imageIn === 'object' && imageIn !== null && 'imageUrl' in imageIn) {
+      sourceImageUrl = String((imageIn as Record<string, unknown>).imageUrl || '');
+    } else if (typeof data.imageUrl === 'string') {
       sourceImageUrl = data.imageUrl;
     }
 
@@ -164,12 +169,12 @@ export class NodeExecutor {
 
     // 2. Resolve instruction prompt
     let instructionPrompt = '';
-    if (resolvedInputs['text-in']) {
-      instructionPrompt =
-        typeof resolvedInputs['text-in'] === 'string'
-          ? resolvedInputs['text-in']
-          : resolvedInputs['text-in'].text || '';
-    } else if (data.prompt) {
+    const textIn = resolvedInputs['text-in'];
+    if (typeof textIn === 'string') {
+      instructionPrompt = textIn;
+    } else if (typeof textIn === 'object' && textIn !== null && 'text' in textIn) {
+      instructionPrompt = String((textIn as Record<string, unknown>).text || '');
+    } else if (typeof data.prompt === 'string') {
       instructionPrompt = data.prompt;
     }
 
@@ -177,7 +182,7 @@ export class NodeExecutor {
     const aiResponse = await this.aiGateway.editImage({
       inputImageUrl: sourceImageUrl,
       prompt: instructionPrompt || 'enhance details and style',
-      strength: data.strength || 0.75,
+      strength: typeof data.strength === 'number' ? data.strength : 0.75,
     });
 
     return {
@@ -194,16 +199,16 @@ export class NodeExecutor {
   }
 
   private async executeResultNode(
-    data: Record<string, any>,
-    resolvedInputs: Record<string, any>,
+    _data: Record<string, unknown>,
+    resolvedInputs: Record<string, unknown>,
   ): Promise<NodeExecutionOutput> {
     let resultImageUrl = '';
-    if (resolvedInputs['image-in']) {
-      resultImageUrl =
-        typeof resolvedInputs['image-in'] === 'string'
-          ? resolvedInputs['image-in']
-          : resolvedInputs['image-in'].imageUrl || '';
-    } else if (resolvedInputs.imageUrl) {
+    const imageIn = resolvedInputs['image-in'];
+    if (typeof imageIn === 'string') {
+      resultImageUrl = imageIn;
+    } else if (typeof imageIn === 'object' && imageIn !== null && 'imageUrl' in imageIn) {
+      resultImageUrl = String((imageIn as Record<string, unknown>).imageUrl || '');
+    } else if (typeof resolvedInputs.imageUrl === 'string') {
       resultImageUrl = resolvedInputs.imageUrl;
     }
 

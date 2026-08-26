@@ -34,5 +34,5 @@ export interface RunEventPayload {
   status?: JobStatus | WorkflowRunStatus;
   progress?: number;
   message?: string;
-  data?: any;
+  data?: unknown;
 }

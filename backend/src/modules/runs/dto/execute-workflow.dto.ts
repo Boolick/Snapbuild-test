@@ -1,16 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import {
-  WorkflowNodeDto,
-  WorkflowEdgeDto,
-} from '../../workflows/dto/create-workflow.dto';
+import { WorkflowNodeDto, WorkflowEdgeDto } from '../../workflows/dto/create-workflow.dto';
 
 export class ExecuteWorkflowDto {
   @ApiPropertyOptional({ example: 'My AI Generation Run' })

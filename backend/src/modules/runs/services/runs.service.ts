@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { WorkflowRun } from '../domain/run.entity';
 import { NodeJob } from '../domain/node-job.entity';
 import { JobStatus, WorkflowRunStatus } from '../domain/run-status.enum';
@@ -98,32 +93,22 @@ export class RunsService {
 
   listRuns(): WorkflowRun[] {
     return Array.from(this.runs.values()).sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
   }
 
-  async retryNode(
-    runId: string,
-    nodeId: string,
-    dto?: RetryNodeDto,
-  ): Promise<WorkflowRun> {
+  async retryNode(runId: string, nodeId: string, dto?: RetryNodeDto): Promise<WorkflowRun> {
     const run = this.getRunById(runId);
 
     const targetJob = run.jobs[nodeId];
     if (!targetJob) {
-      throw new NotFoundException(
-        `Node "${nodeId}" not found in run "${runId}"`,
-      );
+      throw new NotFoundException(`Node "${nodeId}" not found in run "${runId}"`);
     }
 
     this.logger.log(`Retrying node "${nodeId}" in run "${runId}"...`);
 
     // 1. Identify all downstream nodes that depend on this node
-    const downstreamIds = DagScheduler.getDownstreamNodeIds(
-      nodeId,
-      run.graph.edges,
-    );
+    const downstreamIds = DagScheduler.getDownstreamNodeIds(nodeId, run.graph.edges);
     const affectedNodeIds = new Set<string>([nodeId, ...downstreamIds]);
 
     // 2. Reset affected jobs to QUEUED
@@ -154,18 +139,12 @@ export class RunsService {
     run.error = undefined;
 
     // 4. Asynchronously start re-executing the subtree
-    const nodeOverrides = dto?.dataOverrides
-      ? { [nodeId]: dto.dataOverrides }
-      : undefined;
+    const nodeOverrides = dto?.dataOverrides ? { [nodeId]: dto.dataOverrides } : undefined;
 
     setImmediate(() => {
-      this.executionEngine
-        .executeRun(run, nodeOverrides, retryWaves)
-        .catch((err) => {
-          this.logger.error(
-            `Retry execution error for run ${runId}: ${err.message}`,
-          );
-        });
+      this.executionEngine.executeRun(run, nodeOverrides, retryWaves).catch((err) => {
+        this.logger.error(`Retry execution error for run ${runId}: ${err.message}`);
+      });
     });
 
     return run;

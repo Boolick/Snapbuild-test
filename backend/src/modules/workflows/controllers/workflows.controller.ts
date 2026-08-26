@@ -2,10 +2,7 @@ import { Controller, Post, Get, Body, Param } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { WorkflowsService } from '../services/workflows.service';
 import { GraphValidatorService } from '../services/graph-validator.service';
-import {
-  ValidateGraphDto,
-  ValidateGraphResponseDto,
-} from '../dto/validate-graph.dto';
+import { ValidateGraphDto, ValidateGraphResponseDto } from '../dto/validate-graph.dto';
 import { Workflow } from '../domain/workflow.entity';
 
 @ApiTags('Workflows')

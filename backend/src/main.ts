@@ -47,10 +47,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter(), new HttpExceptionFilter());
 
   // 5. Global Interceptors (Logging, Execution Timing, Transform Envelope)
-  app.useGlobalInterceptors(
-    new LoggingInterceptor(),
-    new TransformInterceptor(),
-  );
+  app.useGlobalInterceptors(new LoggingInterceptor(), new TransformInterceptor());
 
   // 6. OpenAPI / Swagger Documentation
   setupSwagger(app);

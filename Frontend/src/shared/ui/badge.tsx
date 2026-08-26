@@ -2,14 +2,7 @@ import React from 'react';
 import { cn } from '../lib/utils/cn';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?:
-    | 'default'
-    | 'success'
-    | 'warning'
-    | 'error'
-    | 'info'
-    | 'port-text'
-    | 'port-image';
+  variant?: 'default' | 'success' | 'warning' | 'error' | 'info' | 'port-text' | 'port-image';
 }
 
 export const Badge: React.FC<BadgeProps> = ({

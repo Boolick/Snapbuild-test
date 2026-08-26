@@ -8,18 +8,16 @@ import { CustomNodeType } from '../model/types';
 import { runApi } from '../../run/api/run-api';
 import { Sliders, Sparkles } from 'lucide-react';
 
-export const EditImageNode: React.FC<NodeProps<CustomNodeType>> = ({
-  id,
-  data,
-  selected,
-}) => {
+export const EditImageNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, selected }) => {
   const updateNodeData = useWorkflowStore((s) => s.updateNodeData);
   const activeRunId = useWorkflowStore((s) => s.activeRunId);
   const schema = NODE_SCHEMAS[NodeType.EDIT_IMAGE];
   const strength = data.strength !== undefined ? data.strength : 0.75;
 
   const handleRetry = async () => {
-    if (!activeRunId) return;
+    if (!activeRunId) {
+      return;
+    }
     try {
       await runApi.retryNode(activeRunId, id);
     } catch (err) {
@@ -57,9 +55,7 @@ export const EditImageNode: React.FC<NodeProps<CustomNodeType>> = ({
             max="1.0"
             step="0.05"
             value={strength}
-            onChange={(e) =>
-              updateNodeData(id, { strength: parseFloat(e.target.value) })
-            }
+            onChange={(e) => updateNodeData(id, { strength: parseFloat(e.target.value) })}
             className="w-full h-1.5 bg-panel-subtle rounded-lg appearance-none cursor-pointer accent-brand"
           />
           <div className="flex justify-between text-[10px] text-text-dim mt-1">
@@ -70,16 +66,12 @@ export const EditImageNode: React.FC<NodeProps<CustomNodeType>> = ({
 
         <div className="p-2 rounded-lg bg-panel-subtle border border-border text-[11px] text-text-muted flex items-start gap-2">
           <Sparkles size={14} className="text-pink-400 shrink-0 mt-0.5" />
-          <span>
-            Connect Source Image (top port) & Text Instruction (bottom port).
-          </span>
+          <span>Connect Source Image (top port) & Text Instruction (bottom port).</span>
         </div>
 
         {data.jobOutput?.imageUrl && (
           <div className="pt-1">
-            <span className="text-[10px] text-text-dim block mb-1">
-              Edited Result:
-            </span>
+            <span className="text-[10px] text-text-dim block mb-1">Edited Result:</span>
             <img
               src={data.jobOutput.imageUrl}
               alt="Edited preview"

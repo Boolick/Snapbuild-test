@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Param,
-  Body,
-  Sse,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Sse, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 import { RunsService } from '../services/runs.service';
@@ -41,7 +32,7 @@ export class RunsController {
       status: run.status,
       executionWaves: run.executionWaves,
       createdAt: run.createdAt,
-      message: 'Run successfully initiated. Subscribe to SSE via /api/v1/runs/' + run.id + '/events',
+      message: `Run successfully initiated. Subscribe to SSE via /api/v1/runs/${run.id}/events`,
     };
   }
 

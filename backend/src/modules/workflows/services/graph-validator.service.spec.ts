@@ -1,5 +1,6 @@
 import { GraphValidatorService } from './graph-validator.service';
 import { NodeType } from '../domain/port-type.enum';
+import { ValidateGraphDto } from '../dto/validate-graph.dto';
 
 describe('GraphValidatorService', () => {
   let service: GraphValidatorService;
@@ -48,7 +49,7 @@ describe('GraphValidatorService', () => {
       ],
     };
 
-    const result = service.validate(validGraph as any);
+    const result = service.validate(validGraph as unknown as ValidateGraphDto);
     expect(result.isValid).toBe(true);
     expect(result.errors).toHaveLength(0);
     expect(result.executionWaves).toEqual([['prompt-1'], ['gen-1'], ['res-1']]);
@@ -88,7 +89,7 @@ describe('GraphValidatorService', () => {
       ],
     };
 
-    const result = service.validate(cyclicGraph as any);
+    const result = service.validate(cyclicGraph as unknown as ValidateGraphDto);
     expect(result.isValid).toBe(false);
     expect(result.errors.some((e) => e.code === 'CYCLE_DETECTED')).toBe(true);
   });
@@ -120,7 +121,7 @@ describe('GraphValidatorService', () => {
       ],
     };
 
-    const result = service.validate(incompatibleGraph as any);
+    const result = service.validate(incompatibleGraph as unknown as ValidateGraphDto);
     expect(result.isValid).toBe(false);
     expect(result.errors.some((e) => e.code === 'INCOMPATIBLE_PORTS')).toBe(true);
   });

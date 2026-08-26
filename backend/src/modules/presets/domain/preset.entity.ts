@@ -4,7 +4,7 @@ export interface PresetParameters {
   steps?: number;
   cfgScale?: number;
   seed?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export class Preset {

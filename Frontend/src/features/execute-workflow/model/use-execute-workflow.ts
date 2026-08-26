@@ -54,13 +54,11 @@ export function useExecuteWorkflow() {
 
             case 'node_success':
               if (event.nodeId) {
-                updateNodeJob(
-                  event.nodeId,
-                  JobStatus.SUCCESS,
-                  event.data,
-                  undefined,
-                  event.data?.metadata?.generationDurationMs || 1200,
-                );
+                const duration =
+                  typeof event.data?.metadata?.generationDurationMs === 'number'
+                    ? event.data.metadata.generationDurationMs
+                    : 1200;
+                updateNodeJob(event.nodeId, JobStatus.SUCCESS, event.data, undefined, duration);
               }
               break;
 
@@ -96,8 +94,9 @@ export function useExecuteWorkflow() {
           unsubscribe();
         },
       });
-    } catch (err: any) {
-      setError(err.message || 'Failed to start workflow execution');
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to start workflow execution';
+      setError(errorMsg);
       setIsExecuting(false);
       setLoading(false);
       resetAllJobStatuses();

@@ -46,5 +46,7 @@ Thumbs.db
 .gemini/
 graphify-out/cache/
 graphify-out/20*/
+*.tsbuildinfo
+
 
 

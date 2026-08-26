@@ -14,10 +14,14 @@ export const NodeInspector: React.FC = () => {
   const updateNodeData = useWorkflowStore((s) => s.updateNodeData);
   const deleteNode = useWorkflowStore((s) => s.deleteNode);
 
-  if (!selectedNodeId) return null;
+  if (!selectedNodeId) {
+    return null;
+  }
 
   const node = nodes.find((n) => n.id === selectedNodeId);
-  if (!node) return null;
+  if (!node) {
+    return null;
+  }
 
   const schema = NODE_SCHEMAS[node.type as NodeType];
   const incomingEdges = edges.filter((e) => e.target === node.id);
@@ -58,10 +62,7 @@ export const NodeInspector: React.FC = () => {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-text-dim">Job Status</span>
-            <NodeStatusBadge
-              status={node.data.jobStatus}
-              durationMs={node.data.jobDurationMs}
-            />
+            <NodeStatusBadge status={node.data.jobStatus} durationMs={node.data.jobDurationMs} />
           </div>
         </div>
 

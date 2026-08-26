@@ -22,8 +22,7 @@ export const PresetCard: React.FC<PresetCardProps> = ({
       onClick={() => onSelect?.(preset)}
       className={cn(
         'group relative bg-panel-subtle border border-border rounded-xl p-3.5 cursor-pointer transition-all duration-200 hover:border-brand/60 hover:bg-[#19212a]',
-        isSelected &&
-          'border-brand bg-[#171d2c] shadow-lg shadow-brand/10 ring-1 ring-brand',
+        isSelected && 'border-brand bg-[#171d2c] shadow-lg shadow-brand/10 ring-1 ring-brand',
         compact && 'p-2.5',
       )}
     >
@@ -56,9 +55,7 @@ export const PresetCard: React.FC<PresetCardProps> = ({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h4 className="text-sm font-semibold text-text truncate">
-              {preset.name}
-            </h4>
+            <h4 className="text-sm font-semibold text-text truncate">{preset.name}</h4>
             {preset.defaultParams?.style && (
               <Badge variant="default" className="text-[10px] py-0">
                 {preset.defaultParams.style}

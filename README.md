@@ -6,6 +6,7 @@
 ---
 
 ## 📑 Table of Contents
+
 1. [Project Overview & Supported Scenarios](#-project-overview--supported-scenarios)
 2. [Architecture & Design Principles](#-architecture--design-principles)
    - [Frontend Architecture: Feature-Sliced Design (FSD v2.1)](#frontend-architecture-feature-sliced-design-fsd-v21)
@@ -27,25 +28,31 @@ This project is a high-performance, node-based visual workflow editor for AI ima
 ### 🌟 3 Built-in Scenarios (One-Click Templates)
 
 #### Scenario 1: Text to Image Pipeline
+
 ```
 [ Prompt Node ] ──(text)──> [ Generate Image Node ] ──(image)──> [ Result Node ]
 ```
+
 - Accepts text input, combines it with the selected Preset rules, calls AI generation provider, and streams the preview to the Result node.
 
 #### Scenario 2: Image Edit & Inpaint Pipeline
+
 ```
 [ Image Input Node ] ──(image)──┐
                                 ├─> [ Edit Image Node ] ──(image)──> [ Result Node ]
 [ Prompt Node ] ───────(text)───┘
 ```
+
 - Takes a source image URL and an instruction prompt to perform image transformation / style transfer with configurable strength.
 
 #### Scenario 3: Mandatory Parallel Branching
+
 ```
                       ┌──(text)──> [ Generate Image A ] ──(image)──> [ Result A ]
 [ Prompt Node ] ──────┤
                       └──(text)──> [ Generate Image B ] ──(image)──> [ Result B ]
 ```
+
 - A single prompt feeds into two different AI generators (e.g. **Branch A: Cyberpunk Neon** and **Branch B: Anime Fantasy**), which **execute concurrently in parallel** in the same scheduling wave!
 
 ---
@@ -192,6 +199,7 @@ flowchart LR
 ## 🎨 Preset System & AI Request Builder
 
 The Preset model is a first-class citizen in the data layer:
+
 ```json
 {
   "id": "preset-cyberpunk-neon",
@@ -199,9 +207,7 @@ The Preset model is a first-class citizen in the data layer:
   "description": "Atmospheric futuristic cyberpunk night scene with glowing neon lights",
   "mainPrompt": "cyberpunk aesthetic, rainy night city, intense neon reflections...",
   "negativePrompt": "daylight, sunshine, oversaturated pastel, cartoon, blurry...",
-  "references": [
-    "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600"
-  ],
+  "references": ["https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600"],
   "defaultParams": {
     "aspectRatio": "16:9",
     "style": "cyberpunk",
@@ -212,6 +218,7 @@ The Preset model is a first-class citizen in the data layer:
 ```
 
 ### Request Builder Formula:
+
 $$\text{Final Prompt} = \text{User Prompt} + \text{Preset.mainPrompt}$$
 $$\text{Negative Prompt} = \text{Preset.negativePrompt}$$
 $$\text{References} = \text{Preset.references} \cup \text{Node Image Inputs}$$
@@ -222,14 +229,14 @@ $$\text{References} = \text{Preset.references} \cup \text{Node Image Inputs}$$
 
 The canvas and backend validate port connections to prevent invalid pipeline combinations:
 
-| Source Output Port | Target Input Port | Status | Reason |
-|---|---|---|---|
-| `text` (`Prompt`) | `text` (`Generate Image`) | ✅ Allowed | Text prompt forwarding |
-| `image` (`Image Input`) | `image` (`Edit Image`) | ✅ Allowed | Source image forwarding |
-| `text` (`Prompt`) | `text` (`Edit Image`) | ✅ Allowed | Edit instruction prompt |
-| `image` (`Generate Image`) | `image` (`Result`) | ✅ Allowed | Image preview |
-| `image` (`Image Input`) | `text` (`Generate Image`) | ❌ **Blocked** | Incompatible types (`image` $\neq$ `text`) |
-| `text` (`Prompt`) | `image` (`Result`) | ❌ **Blocked** | Incompatible types (`text` $\neq$ `image`) |
+| Source Output Port         | Target Input Port         | Status         | Reason                                     |
+| -------------------------- | ------------------------- | -------------- | ------------------------------------------ |
+| `text` (`Prompt`)          | `text` (`Generate Image`) | ✅ Allowed     | Text prompt forwarding                     |
+| `image` (`Image Input`)    | `image` (`Edit Image`)    | ✅ Allowed     | Source image forwarding                    |
+| `text` (`Prompt`)          | `text` (`Edit Image`)     | ✅ Allowed     | Edit instruction prompt                    |
+| `image` (`Generate Image`) | `image` (`Result`)        | ✅ Allowed     | Image preview                              |
+| `image` (`Image Input`)    | `text` (`Generate Image`) | ❌ **Blocked** | Incompatible types (`image` $\neq$ `text`) |
+| `text` (`Prompt`)          | `image` (`Result`)        | ❌ **Blocked** | Incompatible types (`text` $\neq$ `image`) |
 
 ---
 
@@ -238,6 +245,7 @@ The canvas and backend validate port connections to prevent invalid pipeline com
 Interactive OpenAPI / Swagger documentation is available at: `http://localhost:4000/api/docs`.
 
 ### Key Endpoints:
+
 - `POST /api/v1/runs` — Submit workflow graph for asynchronous DAG execution. Returns `{ runId, status, executionWaves }`.
 - `GET /api/v1/runs/:runId` — Get full run snapshot with node-by-node job states (`idle`, `queued`, `running`, `success`, `error`).
 - `GET /api/v1/runs/:runId/events` — **Server-Sent Events (SSE)** endpoint streaming real-time status transitions.
@@ -259,10 +267,12 @@ Interactive OpenAPI / Swagger documentation is available at: `http://localhost:4
 ## 🚀 Quick Start & Launch Guide
 
 ### Prerequisites
+
 - Node.js >= 18 (Tested on Node 20 & 24)
 - npm >= 9
 
 ### Option 1: Run Locally with npm
+
 ```bash
 # 1. Install dependencies for root, backend and frontend
 npm run install:all
@@ -270,11 +280,13 @@ npm run install:all
 # 2. Run backend and frontend concurrently
 npm run dev
 ```
+
 - Frontend: `http://localhost:5173`
 - Backend API: `http://localhost:4000/api/v1`
 - Swagger Docs: `http://localhost:4000/api/docs`
 
 ### Option 2: Run with Docker Compose
+
 ```bash
 docker-compose up --build
 ```
@@ -284,12 +296,14 @@ docker-compose up --build
 ## 🧪 Verification & Automated Tests
 
 To run the backend test suite:
+
 ```bash
 cd backend
 npm run test
 ```
 
 ### Test Coverage Highlights:
+
 - `graph-validator.service.spec.ts`: Validates linear pipelines, rejects cycles, and rejects incompatible ports.
 - `dag-scheduler.spec.ts`: Tests topological wave grouping for parallel execution and downstream dependency tree extraction for retries.
 - `prompt-builder.spec.ts`: Tests Preset prompt fusion and parameter defaults.

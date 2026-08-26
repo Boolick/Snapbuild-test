@@ -54,7 +54,7 @@ export const WorkflowCanvas: React.FC = () => {
     if (nodes.length === 0) {
       loadTemplate(WORKFLOW_TEMPLATES[2]); // Scenario 3: Branching & Parallelism
     }
-  }, [loadTemplate, setPresets]);
+  }, [loadTemplate, setPresets, nodes.length]);
 
   return (
     <div className="relative w-full h-full bg-[#080b0e] overflow-hidden">
@@ -81,12 +81,7 @@ export const WorkflowCanvas: React.FC = () => {
         minZoom={0.2}
         maxZoom={2.0}
       >
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={20}
-          size={1.5}
-          color="#1e2631"
-        />
+        <Background variant={BackgroundVariant.Dots} gap={20} size={1.5} color="#1e2631" />
         <Controls className="!bg-panel !border-border !rounded-xl !overflow-hidden !shadow-2xl fill-text [&>button]:!bg-panel [&>button]:!border-border [&>button]:!text-text-muted hover:[&>button]:!bg-panel-subtle hover:[&>button]:!text-text" />
         <MiniMap
           nodeStrokeWidth={3}

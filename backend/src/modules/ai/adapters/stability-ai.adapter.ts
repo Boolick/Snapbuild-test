@@ -1,10 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { ImageGenerationProvider } from '../ports/ai-provider.interface';
-import {
-  AiImageGenerationRequest,
-  AiImageEditRequest,
-} from '../domain/ai-request.interface';
+import { AiImageGenerationRequest, AiImageEditRequest } from '../domain/ai-request.interface';
 import { AiImageResponse } from '../domain/ai-response.interface';
 
 @Injectable()
@@ -14,9 +11,7 @@ export class StabilityAiAdapter implements ImageGenerationProvider {
 
   constructor(private readonly apiKey?: string) {}
 
-  async generateImage(
-    request: AiImageGenerationRequest,
-  ): Promise<AiImageResponse> {
+  async generateImage(request: AiImageGenerationRequest): Promise<AiImageResponse> {
     if (!this.apiKey) {
       throw new Error('Stability AI API Key is missing');
     }
@@ -66,9 +61,13 @@ export class StabilityAiAdapter implements ImageGenerationProvider {
         height,
         seed: response.data.artifacts[0].seed,
       };
-    } catch (error: any) {
-      const errorMsg =
-        error.response?.data?.message || error.message || 'Stability AI error';
+    } catch (error: unknown) {
+      let errorMsg = 'Stability AI error';
+      if (axios.isAxiosError(error)) {
+        errorMsg = error.response?.data?.message || error.message;
+      } else if (error instanceof Error) {
+        errorMsg = error.message;
+      }
       throw new Error(`Stability AI Error: ${errorMsg}`);
     }
   }

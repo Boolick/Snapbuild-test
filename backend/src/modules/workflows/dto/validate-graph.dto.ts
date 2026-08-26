@@ -18,7 +18,12 @@ export class ValidateGraphDto {
 }
 
 export class ValidationErrorDetail {
-  code: 'CYCLE_DETECTED' | 'INCOMPATIBLE_PORTS' | 'UNKNOWN_NODE' | 'MISSING_REQUIRED_INPUT' | 'INVALID_PORT';
+  code:
+    | 'CYCLE_DETECTED'
+    | 'INCOMPATIBLE_PORTS'
+    | 'UNKNOWN_NODE'
+    | 'MISSING_REQUIRED_INPUT'
+    | 'INVALID_PORT';
   message: string;
   nodeId?: string;
   edgeId?: string;

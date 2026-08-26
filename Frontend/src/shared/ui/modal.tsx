@@ -29,7 +29,9 @@ export const Modal: React.FC<ModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   const maxWidthClasses = {
     sm: 'max-w-sm',
@@ -56,9 +58,7 @@ export const Modal: React.FC<ModalProps> = ({
           <div className="flex items-center justify-between px-6 py-4 border-b border-border">
             <div>
               {title && <h3 className="text-lg font-semibold text-text">{title}</h3>}
-              {description && (
-                <p className="text-xs text-text-muted mt-0.5">{description}</p>
-              )}
+              {description && <p className="text-xs text-text-muted mt-0.5">{description}</p>}
             </div>
             <button
               onClick={onClose}

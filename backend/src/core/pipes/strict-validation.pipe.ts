@@ -1,8 +1,4 @@
-import {
-  ValidationPipe,
-  ValidationError,
-  BadRequestException,
-} from '@nestjs/common';
+import { ValidationPipe, ValidationError, BadRequestException } from '@nestjs/common';
 
 export class StrictValidationPipe extends ValidationPipe {
   constructor() {

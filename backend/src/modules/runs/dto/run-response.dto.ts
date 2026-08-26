@@ -21,10 +21,10 @@ export class NodeJobResponseDto {
   durationMs?: number;
 
   @ApiPropertyOptional()
-  inputs?: Record<string, any>;
+  inputs?: Record<string, unknown>;
 
   @ApiPropertyOptional()
-  outputs?: Record<string, any>;
+  outputs?: Record<string, unknown>;
 
   @ApiPropertyOptional()
   error?: string;
@@ -64,5 +64,5 @@ export class RunResponseDto {
 
 export class RetryNodeDto {
   @ApiPropertyOptional({ description: 'Optional overrides for node input data' })
-  dataOverrides?: Record<string, any>;
+  dataOverrides?: Record<string, unknown>;
 }

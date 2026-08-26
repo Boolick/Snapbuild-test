@@ -1,8 +1,7 @@
 import React from 'react';
 import { cn } from '../lib/utils/cn';
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost' | 'success';
   size?: 'sm' | 'md' | 'lg' | 'icon';
   loading?: boolean;
@@ -10,15 +9,7 @@ export interface ButtonProps
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    {
-      className,
-      variant = 'primary',
-      size = 'md',
-      loading = false,
-      disabled,
-      children,
-      ...props
-    },
+    { className, variant = 'primary', size = 'md', loading = false, disabled, children, ...props },
     ref,
   ) => {
     const baseStyles =
@@ -27,12 +18,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const variants = {
       primary:
         'bg-brand text-white hover:bg-brand-hover shadow-lg shadow-brand/20 border border-brand/50',
-      secondary:
-        'bg-panel-subtle text-text hover:bg-[#1f2730] border border-border',
+      secondary: 'bg-panel-subtle text-text hover:bg-[#1f2730] border border-border',
       outline:
         'border border-border bg-transparent text-text hover:bg-panel-subtle hover:border-text-muted',
-      danger:
-        'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30',
+      danger: 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30',
       success:
         'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30',
       ghost: 'bg-transparent text-text-muted hover:text-white hover:bg-panel-subtle',

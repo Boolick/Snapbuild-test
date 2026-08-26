@@ -36,7 +36,7 @@ export const runApi = {
   retryNode: async (
     runId: string,
     nodeId: string,
-    dataOverrides?: Record<string, any>,
+    dataOverrides?: Record<string, unknown>,
   ): Promise<{ runId: string; retriedNodeId: string; status: string }> => {
     const response = await apiClient.post(`/runs/${runId}/retry/${nodeId}`, {
       dataOverrides,

@@ -7,5 +7,5 @@ export class RetryNodeDto {
   })
   @IsOptional()
   @IsObject()
-  dataOverrides?: Record<string, any>;
+  dataOverrides?: Record<string, unknown>;
 }

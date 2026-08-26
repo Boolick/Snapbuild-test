@@ -33,6 +33,18 @@ export interface NodePort {
   type: PortType;
 }
 
+export interface NodeJobOutput {
+  imageUrl?: string;
+  previewUrl?: string;
+  promptUsed?: string;
+  negativePromptUsed?: string;
+  provider?: string;
+  model?: string;
+  text?: string;
+  metadata?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 export interface NodeData {
   label?: string;
   prompt?: string;
@@ -44,11 +56,11 @@ export interface NodeData {
   steps?: number;
   strength?: number;
   jobStatus?: JobStatus;
-  jobOutput?: Record<string, any>;
+  jobOutput?: NodeJobOutput;
   jobError?: string;
   jobDurationMs?: number;
   retryCount?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface CanvasNode {
@@ -65,7 +77,7 @@ export interface CanvasEdge {
   target: string;
   targetHandle?: string;
   animated?: boolean;
-  style?: Record<string, any>;
+  style?: Record<string, unknown>;
 }
 
 export interface WorkflowTemplate {

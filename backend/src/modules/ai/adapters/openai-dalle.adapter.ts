@@ -1,10 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { ImageGenerationProvider } from '../ports/ai-provider.interface';
-import {
-  AiImageGenerationRequest,
-  AiImageEditRequest,
-} from '../domain/ai-request.interface';
+import { AiImageGenerationRequest, AiImageEditRequest } from '../domain/ai-request.interface';
 import { AiImageResponse } from '../domain/ai-response.interface';
 
 @Injectable()
@@ -14,9 +11,7 @@ export class OpenAiDalleAdapter implements ImageGenerationProvider {
 
   constructor(private readonly apiKey?: string) {}
 
-  async generateImage(
-    request: AiImageGenerationRequest,
-  ): Promise<AiImageResponse> {
+  async generateImage(request: AiImageGenerationRequest): Promise<AiImageResponse> {
     if (!this.apiKey) {
       throw new Error(
         'OpenAI API Key is missing. Please configure OPENAI_API_KEY on the backend server.',
@@ -24,12 +19,7 @@ export class OpenAiDalleAdapter implements ImageGenerationProvider {
     }
 
     const startTime = Date.now();
-    const size =
-      request.aspectRatio === '16:9'
-        ? '1792x1024'
-        : request.aspectRatio === '9:16'
-          ? '1024x1792'
-          : '1024x1024';
+    const size = this.resolveDalleSize(request.aspectRatio);
 
     this.logger.log(`Calling OpenAI DALL-E 3 API with size ${size}...`);
 
@@ -72,11 +62,13 @@ export class OpenAiDalleAdapter implements ImageGenerationProvider {
           presetId: request.metadata?.presetId,
         },
       };
-    } catch (error: any) {
-      const errorMsg =
-        error.response?.data?.error?.message ||
-        error.message ||
-        'OpenAI DALL-E generation failed';
+    } catch (error: unknown) {
+      let errorMsg = 'OpenAI DALL-E generation failed';
+      if (axios.isAxiosError(error)) {
+        errorMsg = error.response?.data?.error?.message || error.message;
+      } else if (error instanceof Error) {
+        errorMsg = error.message;
+      }
       this.logger.error(`OpenAI DALL-E Error: ${errorMsg}`);
       throw new Error(`OpenAI DALL-E Error: ${errorMsg}`);
     }
@@ -118,10 +110,24 @@ export class OpenAiDalleAdapter implements ImageGenerationProvider {
         width: 1024,
         height: 1024,
       };
-    } catch (error: any) {
-      const errorMsg =
-        error.response?.data?.error?.message || error.message;
+    } catch (error: unknown) {
+      let errorMsg = 'OpenAI Image Edit Error';
+      if (axios.isAxiosError(error)) {
+        errorMsg = error.response?.data?.error?.message || error.message;
+      } else if (error instanceof Error) {
+        errorMsg = error.message;
+      }
       throw new Error(`OpenAI Image Edit Error: ${errorMsg}`);
     }
+  }
+
+  private resolveDalleSize(aspectRatio?: string): string {
+    if (aspectRatio === '16:9') {
+      return '1792x1024';
+    }
+    if (aspectRatio === '9:16') {
+      return '1024x1792';
+    }
+    return '1024x1024';
   }
 }

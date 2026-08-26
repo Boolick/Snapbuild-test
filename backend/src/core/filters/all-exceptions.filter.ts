@@ -1,10 +1,4 @@
-import {
-  ExceptionFilter,
-  Catch,
-  ArgumentsHost,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpStatus, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ApiErrorResponse } from '../../common/interfaces/api-response.interface';
 
@@ -19,9 +13,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const status = HttpStatus.INTERNAL_SERVER_ERROR;
     const message =
-      exception instanceof Error
-        ? exception.message
-        : 'Internal server error occurred';
+      exception instanceof Error ? exception.message : 'Internal server error occurred';
 
     this.logger.error(
       `[${request.method}] ${request.url} -> Unhandled Exception: ${message}`,

@@ -1,7 +1,6 @@
 import { NodeType, PortType, NodePort } from '../types/graph';
 
-export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api/v1';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api/v1';
 
 export const PORT_COLORS: Record<PortType, string> = {
   [PortType.TEXT]: '#60a5fa', // Blue
