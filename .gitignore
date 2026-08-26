@@ -45,4 +45,6 @@ Thumbs.db
 .planning/
 .gemini/
 graphify-out/cache/
+graphify-out/20*/
+
 
