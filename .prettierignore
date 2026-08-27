@@ -4,6 +4,10 @@ build/
 coverage/
 .planning/
 .gemini/
+.agents/
+GEMINI.md
 graphify-out/
+TT/
 *.tsbuildinfo
 package-lock.json
+
