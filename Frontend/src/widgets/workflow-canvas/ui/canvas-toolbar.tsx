@@ -3,13 +3,17 @@ import { RunButton } from '../../../features/execute-workflow/ui/run-button';
 import { TemplateSelector } from '../../../features/workflow-templates/ui/template-selector';
 import { useWorkflowStore } from '../../../entities/node/model/use-workflow-store';
 import { Trash2, Layers, Cpu } from 'lucide-react';
-import { Button } from '../../../shared/ui';
+import { Button, toast } from '../../../shared/ui';
 
 export const CanvasToolbar: React.FC = () => {
   const clearGraph = useWorkflowStore((s) => s.clearGraph);
   const openPresetDrawer = useWorkflowStore((s) => s.openPresetDrawer);
-  const validationError = useWorkflowStore((s) => s.validationError);
   const isExecuting = useWorkflowStore((s) => s.isExecuting);
+
+  const handleClear = () => {
+    clearGraph();
+    toast.info('Canvas cleared');
+  };
 
   return (
     <header className="h-16 border-b border-border bg-panel/95 backdrop-blur-md px-6 flex items-center justify-between z-30 shrink-0 select-none">
@@ -38,12 +42,6 @@ export const CanvasToolbar: React.FC = () => {
 
       {/* Right Controls: Presets, Clear, Run */}
       <div className="flex items-center gap-3">
-        {validationError && (
-          <div className="hidden sm:block text-xs font-medium px-3 py-1.5 rounded-lg bg-rose-950/80 border border-rose-700/80 text-rose-300 animate-shake">
-            ⚠️ {validationError}
-          </div>
-        )}
-
         <Button
           variant="outline"
           size="sm"
@@ -57,7 +55,7 @@ export const CanvasToolbar: React.FC = () => {
           variant="ghost"
           size="sm"
           disabled={isExecuting}
-          onClick={clearGraph}
+          onClick={handleClear}
           className="gap-1.5 text-xs text-rose-400/80 hover:text-rose-400 hover:bg-rose-950/20"
           title="Clear canvas"
         >

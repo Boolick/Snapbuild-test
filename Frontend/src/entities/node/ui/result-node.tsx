@@ -33,7 +33,10 @@ export const ResultNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, sele
       return (
         <div className="space-y-2">
           <div
-            onClick={() => setIsModalOpen(true)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsModalOpen(true);
+            }}
             className="relative group rounded-xl overflow-hidden border border-emerald-500/30 h-44 bg-black/60 cursor-pointer shadow-lg transition-transform hover:scale-[1.01]"
           >
             <img
@@ -59,7 +62,13 @@ export const ResultNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, sele
             <span className="flex items-center gap-1 text-emerald-400 font-medium">
               <CheckCircle2 size={12} /> Ready
             </span>
-            <button onClick={() => setIsModalOpen(true)} className="text-brand hover:underline">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsModalOpen(true);
+              }}
+              className="text-brand hover:underline"
+            >
               Full View
             </button>
           </div>

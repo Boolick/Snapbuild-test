@@ -54,7 +54,10 @@ export const ImageInputNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, 
           {sampleImages.map((s) => (
             <button
               key={s.label}
-              onClick={() => updateNodeData(id, { imageUrl: s.url })}
+              onClick={(e) => {
+                e.stopPropagation();
+                updateNodeData(id, { imageUrl: s.url });
+              }}
               className="text-[10px] px-1.5 py-0.5 rounded bg-panel-subtle hover:bg-panel text-text-muted hover:text-text border border-border transition-colors"
             >
               {s.label}
@@ -78,6 +81,7 @@ export const ImageInputNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, 
               href={imageUrl}
               target="_blank"
               rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
               className="absolute top-1.5 right-1.5 p-1 rounded bg-black/60 text-white/80 hover:text-white transition-opacity"
             >
               <ExternalLink size={12} />

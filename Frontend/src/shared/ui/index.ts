@@ -6,3 +6,4 @@ export * from './textarea';
 export * from './select';
 export * from './spinner';
 export * from './modal';
+export * from './toast';

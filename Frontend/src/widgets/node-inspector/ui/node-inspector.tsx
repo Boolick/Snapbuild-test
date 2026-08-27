@@ -28,7 +28,7 @@ export const NodeInspector: React.FC = () => {
   const outgoingEdges = edges.filter((e) => e.source === node.id);
 
   return (
-    <aside className="absolute top-4 right-4 z-20 w-80 bg-panel/95 backdrop-blur-md border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-100px)] animate-in fade-in zoom-in-95 duration-150">
+    <aside className="absolute top-4 right-4 z-20 w-80 bg-panel/95 backdrop-blur-md border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-100px)] animate-fade-in">
       {/* Inspector Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-panel-subtle/50">
         <div className="flex items-center gap-2">

@@ -54,7 +54,10 @@ export const GenerateImageNode: React.FC<NodeProps<CustomNodeType>> = ({ id, dat
               <Layers size={11} /> AI Preset
             </span>
             <button
-              onClick={() => openPresetDrawer(id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                openPresetDrawer(id);
+              }}
               className="text-[11px] text-brand hover:text-brand-hover font-semibold transition-colors"
             >
               Browse
@@ -62,7 +65,10 @@ export const GenerateImageNode: React.FC<NodeProps<CustomNodeType>> = ({ id, dat
           </div>
 
           <div
-            onClick={() => openPresetDrawer(id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              openPresetDrawer(id);
+            }}
             className="flex items-center gap-2 p-2 rounded-lg bg-panel-subtle hover:bg-[#18212c] border border-border cursor-pointer transition-colors group"
           >
             {currentPreset?.thumbnailUrl ? (
@@ -94,7 +100,10 @@ export const GenerateImageNode: React.FC<NodeProps<CustomNodeType>> = ({ id, dat
             {aspectRatios.map((ratio) => (
               <button
                 key={ratio}
-                onClick={() => updateNodeData(id, { aspectRatio: ratio })}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateNodeData(id, { aspectRatio: ratio });
+                }}
                 className={cn(
                   'py-1 text-[11px] font-medium rounded border transition-all',
                   aspectRatio === ratio

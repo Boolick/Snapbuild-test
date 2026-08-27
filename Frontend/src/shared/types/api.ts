@@ -59,6 +59,7 @@ export interface RunEventMessage {
   status?: JobStatus | WorkflowRunStatus;
   progress?: number;
   message?: string;
+  durationMs?: number;
   data?: NodeJobOutput;
 }
 

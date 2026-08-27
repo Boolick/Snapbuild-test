@@ -18,16 +18,17 @@ import {
 import { Preset, WorkflowRunSnapshot } from '../../../shared/types/api';
 import { validateConnection } from '../../../shared/lib/graph/port-validator';
 import { DEFAULT_NODE_POSITIONS, INITIAL_NODE_DATA } from './initial-node-data';
+import { toast } from '../../../shared/ui';
 
 interface WorkflowState {
   nodes: CustomNodeType[];
   edges: CustomEdgeType[];
   selectedNodeId: string | null;
+  activeTemplateId: string | null;
 
   activeRunId: string | null;
   activeRun: WorkflowRunSnapshot | null;
   isExecuting: boolean;
-  validationError: string | null;
 
   presets: Preset[];
   isPresetDrawerOpen: boolean;
@@ -45,7 +46,7 @@ interface WorkflowState {
   deleteEdge: (id: string) => void;
   setSelectedNodeId: (id: string | null) => void;
 
-  loadTemplate: (template: WorkflowTemplate) => void;
+  loadTemplate: (template: WorkflowTemplate, silent?: boolean) => void;
   clearGraph: () => void;
 
   setPresets: (presets: Preset[]) => void;
@@ -56,7 +57,6 @@ interface WorkflowState {
   setActiveRunId: (runId: string | null) => void;
   setActiveRun: (run: WorkflowRunSnapshot | null) => void;
   setIsExecuting: (isExecuting: boolean) => void;
-  setValidationError: (err: string | null) => void;
   updateNodeJob: (
     nodeId: string,
     status: JobStatus,
@@ -71,11 +71,11 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   nodes: [],
   edges: [],
   selectedNodeId: null,
+  activeTemplateId: 'template-scenario-3',
 
   activeRunId: null,
   activeRun: null,
   isExecuting: false,
-  validationError: null,
 
   presets: [],
   isPresetDrawerOpen: false,
@@ -113,8 +113,10 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     );
 
     if (!validation.isValid) {
-      set({ validationError: validation.reason || 'Invalid connection' });
-      setTimeout(() => set({ validationError: null }), 4000);
+      toast.error(
+        validation.reason || 'Cannot connect incompatible port types',
+        'Incompatible Port Connection',
+      );
       return false;
     }
 
@@ -130,7 +132,6 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         },
         edges,
       ),
-      validationError: null,
     });
 
     return true;
@@ -186,7 +187,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   setSelectedNodeId: (id) => set({ selectedNodeId: id }),
 
-  loadTemplate: (template) => {
+  loadTemplate: (template, silent = false) => {
     const formattedNodes: CustomNodeType[] = template.nodes.map((n) => ({
       ...n,
       data: {
@@ -205,11 +206,15 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       nodes: formattedNodes,
       edges: formattedEdges,
       selectedNodeId: null,
+      activeTemplateId: template.id,
       activeRunId: null,
       activeRun: null,
       isExecuting: false,
-      validationError: null,
     });
+
+    if (!silent) {
+      toast.info(`Loaded ${template.name.split(':')[0]}`, 'Template Activated');
+    }
   },
 
   clearGraph: () => {
@@ -217,6 +222,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       nodes: [],
       edges: [],
       selectedNodeId: null,
+      activeTemplateId: null,
       activeRunId: null,
       activeRun: null,
       isExecuting: false,
@@ -237,12 +243,12 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       style: preset.defaultParams?.style,
     });
     set({ isPresetDrawerOpen: false, targetPresetNodeId: null });
+    toast.success(`Preset "${preset.name}" attached`, 'Preset Applied');
   },
 
   setActiveRunId: (runId) => set({ activeRunId: runId }),
   setActiveRun: (run) => set({ activeRun: run }),
   setIsExecuting: (isExecuting) => set({ isExecuting }),
-  setValidationError: (err) => set({ validationError: err }),
 
   updateNodeJob: (nodeId, status, output, error, durationMs) => {
     set((state) => ({

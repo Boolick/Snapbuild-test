@@ -46,7 +46,7 @@ export const PresetDrawer: React.FC = () => {
       />
 
       {/* Slide-over Drawer Panel */}
-      <aside className="relative w-full max-w-md bg-panel border-l border-border h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-200">
+      <aside className="relative w-full max-w-md bg-panel border-l border-border h-full shadow-2xl flex flex-col z-10 animate-slide-in-right">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-panel-subtle/50">
           <div className="flex items-center gap-2.5">

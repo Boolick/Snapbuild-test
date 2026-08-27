@@ -52,7 +52,7 @@ export const WorkflowCanvas: React.FC = () => {
 
     // 2. Load Scenario 3 (Parallel Branching) by default if canvas is empty
     if (nodes.length === 0) {
-      loadTemplate(WORKFLOW_TEMPLATES[2]); // Scenario 3: Branching & Parallelism
+      loadTemplate(WORKFLOW_TEMPLATES[2], true); // Scenario 3: Branching & Parallelism (silent on initial mount)
     }
   }, [loadTemplate, setPresets, nodes.length]);
 

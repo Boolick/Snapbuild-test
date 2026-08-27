@@ -4,6 +4,7 @@ import { runApi } from '../../../entities/run/api/run-api';
 import { subscribeToRunEvents } from '../../../shared/api/sse';
 import { JobStatus, CanvasNode, CanvasEdge } from '../../../shared/types/graph';
 import { RunEventMessage } from '../../../shared/types/api';
+import { toast } from '../../../shared/ui';
 
 export function useExecuteWorkflow() {
   const [loading, setLoading] = useState(false);
@@ -18,7 +19,7 @@ export function useExecuteWorkflow() {
 
   const execute = useCallback(async () => {
     if (nodes.length === 0) {
-      setError('Please add at least one node to the workflow.');
+      toast.warning('Please add at least one node to the workflow.', 'Empty Workflow');
       return;
     }
 
@@ -40,6 +41,7 @@ export function useExecuteWorkflow() {
       });
 
       setActiveRunId(res.runId);
+      toast.info(`Workflow run ${res.runId} initiated`, 'Execution Started');
 
       // 2. Subscribe to real-time SSE stream
       const unsubscribe = subscribeToRunEvents({
@@ -54,10 +56,13 @@ export function useExecuteWorkflow() {
 
             case 'node_success':
               if (event.nodeId) {
-                const duration =
-                  typeof event.data?.metadata?.generationDurationMs === 'number'
-                    ? event.data.metadata.generationDurationMs
-                    : 1200;
+                let duration = 200;
+                if (typeof event.durationMs === 'number') {
+                  duration = event.durationMs;
+                }
+                if (typeof event.data?.metadata?.generationDurationMs === 'number') {
+                  duration = event.data.metadata.generationDurationMs;
+                }
                 updateNodeJob(event.nodeId, JobStatus.SUCCESS, event.data, undefined, duration);
               }
               break;
@@ -69,19 +74,23 @@ export function useExecuteWorkflow() {
                   JobStatus.ERROR,
                   undefined,
                   event.message || 'Execution failed',
+                  event.durationMs,
                 );
+                toast.error(event.message || `Node ${event.nodeId} failed`, 'Node Failed');
               }
               break;
 
             case 'run_completed':
               setIsExecuting(false);
               setLoading(false);
+              toast.success(event.message || 'Workflow completed successfully!', 'Run Success');
               break;
 
             case 'run_failed':
               setIsExecuting(false);
               setLoading(false);
               setError(event.message || 'Run failed');
+              toast.error(event.message || 'Workflow run failed', 'Run Failed');
               break;
           }
         },
@@ -100,6 +109,7 @@ export function useExecuteWorkflow() {
       setIsExecuting(false);
       setLoading(false);
       resetAllJobStatuses();
+      toast.error(errorMsg, 'Execution Failed');
     }
   }, [nodes, edges, setIsExecuting, setActiveRunId, updateNodeJob, resetAllJobStatuses]);
 

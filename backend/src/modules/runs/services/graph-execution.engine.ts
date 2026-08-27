@@ -104,6 +104,7 @@ export class GraphExecutionEngine {
             nodeId,
             nodeType: job.nodeType,
             status: JobStatus.SUCCESS,
+            durationMs: nodeDuration,
             data: result.outputs,
           });
 
@@ -127,6 +128,7 @@ export class GraphExecutionEngine {
             nodeId,
             nodeType: job.nodeType,
             status: JobStatus.ERROR,
+            durationMs: nodeDuration,
             message: errorMessage,
           });
 

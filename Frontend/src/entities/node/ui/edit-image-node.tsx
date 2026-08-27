@@ -55,8 +55,10 @@ export const EditImageNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, s
             max="1.0"
             step="0.05"
             value={strength}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
             onChange={(e) => updateNodeData(id, { strength: parseFloat(e.target.value) })}
-            className="w-full h-1.5 bg-panel-subtle rounded-lg appearance-none cursor-pointer accent-brand"
+            className="w-full h-1.5 bg-panel-subtle rounded-lg appearance-none cursor-pointer accent-brand nodrag"
           />
           <div className="flex justify-between text-[10px] text-text-dim mt-1">
             <span>Subtle (10%)</span>

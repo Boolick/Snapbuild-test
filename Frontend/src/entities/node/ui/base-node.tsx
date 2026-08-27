@@ -149,7 +149,10 @@ export const BaseNode: React.FC<BaseNodeProps> = ({
         <div className="flex items-center gap-1.5">
           <NodeStatusBadge status={jobStatus} durationMs={jobDurationMs} />
           <button
-            onClick={() => deleteNode(id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              deleteNode(id);
+            }}
             className="text-text-dim hover:text-rose-400 p-1 rounded transition-colors"
             title="Delete node"
           >
@@ -171,7 +174,10 @@ export const BaseNode: React.FC<BaseNodeProps> = ({
             </p>
             {onRetry && (
               <button
-                onClick={onRetry}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRetry();
+                }}
                 className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-rose-600 hover:bg-rose-500 px-2.5 py-1 rounded transition-colors"
               >
                 <RotateCw size={11} /> Retry this node

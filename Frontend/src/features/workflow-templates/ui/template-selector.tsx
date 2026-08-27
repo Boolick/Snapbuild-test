@@ -6,6 +6,7 @@ import { cn } from '../../../shared/lib/utils/cn';
 
 export const TemplateSelector: React.FC = () => {
   const loadTemplate = useWorkflowStore((s) => s.loadTemplate);
+  const activeTemplateId = useWorkflowStore((s) => s.activeTemplateId);
   const isExecuting = useWorkflowStore((s) => s.isExecuting);
 
   return (
@@ -13,25 +14,32 @@ export const TemplateSelector: React.FC = () => {
       <span className="text-[11px] font-semibold text-text-dim px-2 flex items-center gap-1">
         Templates:
       </span>
-      {WORKFLOW_TEMPLATES.map((tmpl, idx) => (
-        <button
-          key={tmpl.id}
-          disabled={isExecuting}
-          onClick={() => loadTemplate(tmpl)}
-          className={cn(
-            'flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg text-text-muted hover:text-text hover:bg-[#1a232e] border border-transparent hover:border-border transition-all disabled:opacity-40 disabled:cursor-not-allowed',
-            idx === 2 && 'bg-brand/10 text-brand border-brand/30 hover:bg-brand/20',
-          )}
-          title={tmpl.description}
-        >
-          {idx === 2 ? (
-            <GitFork size={13} className="text-brand" />
-          ) : (
-            <ArrowRightCircle size={13} />
-          )}
-          <span>{tmpl.name.split(':')[0]}</span>
-        </button>
-      ))}
+      {WORKFLOW_TEMPLATES.map((tmpl, idx) => {
+        const isActive = activeTemplateId === tmpl.id;
+        const isBranching = idx === 2;
+
+        return (
+          <button
+            key={tmpl.id}
+            disabled={isExecuting}
+            onClick={() => loadTemplate(tmpl)}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed select-none',
+              isActive
+                ? 'bg-brand/20 text-brand border border-brand/50 shadow-sm shadow-brand/20 font-bold'
+                : 'text-text-muted hover:text-text hover:bg-[#1a232e] border border-transparent hover:border-border',
+            )}
+            title={tmpl.description}
+          >
+            {isBranching ? (
+              <GitFork size={13} className={isActive ? 'text-brand' : 'text-text-muted'} />
+            ) : (
+              <ArrowRightCircle size={13} className={isActive ? 'text-brand' : 'text-text-muted'} />
+            )}
+            <span>{tmpl.name.split(':')[0]}</span>
+          </button>
+        );
+      })}
     </div>
   );
 };

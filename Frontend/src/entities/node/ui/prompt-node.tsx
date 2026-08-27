@@ -38,6 +38,8 @@ export const PromptNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, sele
         <Textarea
           value={promptText}
           onChange={handleChange}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
           placeholder="Enter prompt description for image generation..."
           rows={3}
           className="text-xs focus:ring-blue-500/50"
