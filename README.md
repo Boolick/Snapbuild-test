@@ -2,7 +2,8 @@
 
 > **Fullstack AI Engineer Production System & Architectural Blueprint**  
 > Полнофункциональный визуальный редактор рабочих процессов генерации и трансформации изображений на базе искусственного интеллекта. Построен на **React 18 + Feature-Sliced Design (FSD v2.1) + React Flow** на фронтенде и **NestJS + DAG Parallel Execution Engine (Kahn's Topological Waves) + Real-Time SSE** на бэкенде.
-
+> 
+🎬 [Demo video](https://drive.google.com/file/d/1KK7n1lT1GPrH0juw3mxqhZ6xkV5mDEfM/view?usp=sharing)
 ---
 
 ## 📑 Оглавление / Table of Contents
