@@ -5,25 +5,13 @@ import { NODE_SCHEMAS } from '../../../shared/config/constants';
 import { NodeType } from '../../../shared/types/graph';
 import { useWorkflowStore } from '../model/use-workflow-store';
 import { CustomNodeType } from '../model/types';
-import { runApi } from '../../run/api/run-api';
 import { Sliders, Sparkles } from 'lucide-react';
 
 export const EditImageNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, selected }) => {
   const updateNodeData = useWorkflowStore((s) => s.updateNodeData);
-  const activeRunId = useWorkflowStore((s) => s.activeRunId);
+  const retryNode = useWorkflowStore((s) => s.retryNode);
   const schema = NODE_SCHEMAS[NodeType.EDIT_IMAGE];
   const strength = data.strength !== undefined ? data.strength : 0.75;
-
-  const handleRetry = async () => {
-    if (!activeRunId) {
-      return;
-    }
-    try {
-      await runApi.retryNode(activeRunId, id);
-    } catch (err) {
-      console.error('Failed to retry edit image node:', err);
-    }
-  };
 
   return (
     <BaseNode
@@ -37,7 +25,7 @@ export const EditImageNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, s
       jobStatus={data.jobStatus}
       jobError={data.jobError}
       jobDurationMs={data.jobDurationMs}
-      onRetry={handleRetry}
+      onRetry={() => retryNode(id)}
     >
       <div className="space-y-3">
         <div>
@@ -66,9 +54,19 @@ export const EditImageNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, s
           </div>
         </div>
 
-        <div className="p-2 rounded-lg bg-panel-subtle border border-border text-[11px] text-text-muted flex items-start gap-2">
+        <div className="p-2.5 rounded-lg bg-pink-950/20 border border-pink-800/40 text-[11px] text-pink-200/90 flex items-start gap-2">
           <Sparkles size={14} className="text-pink-400 shrink-0 mt-0.5" />
-          <span>Connect Source Image (top port) & Text Instruction (bottom port).</span>
+          <div className="space-y-0.5 leading-tight">
+            <span className="font-semibold text-pink-300 block text-[10px] uppercase tracking-wider">
+              Connection Guide
+            </span>
+            <span className="block text-[10px] text-pink-200/80">
+              🟣 Top port: <strong>Source Image</strong>
+            </span>
+            <span className="block text-[10px] text-pink-200/80">
+              🔵 Bottom port: <strong>Text Instruction</strong>
+            </span>
+          </div>
         </div>
 
         {data.jobOutput?.imageUrl && (

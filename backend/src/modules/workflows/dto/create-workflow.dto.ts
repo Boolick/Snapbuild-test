@@ -7,9 +7,11 @@ import {
   ValidateNested,
   IsEnum,
   IsObject,
+  ArrayMaxSize,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { NodeType } from '../domain/port-type.enum';
+import { WORKFLOW_LIMITS } from '../domain/workflow-limits.constants';
 
 export class NodePositionDto {
   @ApiProperty({ example: 100 })
@@ -76,14 +78,16 @@ export class CreateWorkflowDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ type: [WorkflowNodeDto] })
+  @ApiProperty({ type: [WorkflowNodeDto], maxItems: WORKFLOW_LIMITS.MAX_TOTAL_NODES })
   @IsArray()
+  @ArrayMaxSize(WORKFLOW_LIMITS.MAX_TOTAL_NODES)
   @ValidateNested({ each: true })
   @Type(() => WorkflowNodeDto)
   nodes: WorkflowNodeDto[];
 
-  @ApiProperty({ type: [WorkflowEdgeDto] })
+  @ApiProperty({ type: [WorkflowEdgeDto], maxItems: WORKFLOW_LIMITS.MAX_TOTAL_EDGES })
   @IsArray()
+  @ArrayMaxSize(WORKFLOW_LIMITS.MAX_TOTAL_EDGES)
   @ValidateNested({ each: true })
   @Type(() => WorkflowEdgeDto)
   edges: WorkflowEdgeDto[];

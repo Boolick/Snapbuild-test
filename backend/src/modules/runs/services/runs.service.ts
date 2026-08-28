@@ -107,11 +107,52 @@ export class RunsService {
 
     this.logger.log(`Retrying node "${nodeId}" in run "${runId}"...`);
 
-    // 1. Identify all downstream nodes that depend on this node
-    const downstreamIds = DagScheduler.getDownstreamNodeIds(nodeId, run.graph.edges);
-    const affectedNodeIds = new Set<string>([nodeId, ...downstreamIds]);
+    const changedNodeIds = new Set<string>();
 
-    // 2. Reset affected jobs to QUEUED
+    // Sync all graph node data if provided from client
+    if (dto?.allNodesData) {
+      for (const [nId, nData] of Object.entries(dto.allNodesData)) {
+        const node = run.graph.nodes.find((n) => n.id === nId);
+        if (node) {
+          const oldPrompt = typeof node.data.prompt === 'string' ? node.data.prompt : '';
+          const newPrompt = typeof nData.prompt === 'string' ? nData.prompt : '';
+          if (oldPrompt !== newPrompt) {
+            changedNodeIds.add(nId);
+          }
+          node.data = { ...node.data, ...nData };
+        }
+        // If it's a prompt node, sync its cached text output so downstream nodes get the updated prompt
+        if (node?.type === 'prompt' && typeof nData.prompt === 'string') {
+          const text = nData.prompt.trim();
+          if (run.jobs[nId]) {
+            run.jobs[nId].outputs = { text, 'text-out': text };
+          }
+        }
+      }
+    } else if (dto?.dataOverrides) {
+      const node = run.graph.nodes.find((n) => n.id === nodeId);
+      if (node) {
+        node.data = { ...node.data, ...dto.dataOverrides };
+        changedNodeIds.add(nodeId);
+      }
+    }
+
+    // 1. Resolve all affected nodes: target + uncompleted/failed upstream ancestors + all downstream descendants
+    const affectedNodeIds = DagScheduler.resolveRetryNodeIds(
+      nodeId,
+      { nodes: run.graph.nodes, edges: run.graph.edges },
+      run.jobs,
+      changedNodeIds,
+    );
+
+    this.logger.log(
+      `[Run ${runId}] Retry for "${nodeId}" scheduled execution for ${affectedNodeIds.size} node(s): [${Array.from(affectedNodeIds).join(', ')}]`,
+    );
+
+    // Clear stale terminal failures and event history for retrying nodes
+    this.eventsService.resetHistoryForRetry(runId, affectedNodeIds);
+
+    // 2. Reset affected jobs to QUEUED and emit node_queued events
     for (const id of affectedNodeIds) {
       const job = run.jobs[id];
       if (job) {
@@ -123,10 +164,19 @@ export class RunsService {
         if (id === nodeId) {
           job.retryCount += 1;
         }
+
+        this.eventsService.emit({
+          runId: run.id,
+          type: 'node_queued',
+          timestamp: new Date().toISOString(),
+          nodeId: id,
+          nodeType: job.nodeType,
+          status: JobStatus.QUEUED,
+        });
       }
     }
 
-    // 3. Filter execution waves to only execute the affected subtree
+    // 3. Filter execution waves to only execute the affected subtree in topological order
     const retryWaves: string[][] = [];
     for (const wave of run.executionWaves) {
       const filteredWave = wave.filter((id) => affectedNodeIds.has(id));
@@ -139,7 +189,12 @@ export class RunsService {
     run.error = undefined;
 
     // 4. Asynchronously start re-executing the subtree
-    const nodeOverrides = dto?.dataOverrides ? { [nodeId]: dto.dataOverrides } : undefined;
+    let nodeOverrides: Record<string, Record<string, unknown>> | undefined;
+    if (dto?.allNodesData) {
+      nodeOverrides = dto.allNodesData;
+    } else if (dto?.dataOverrides) {
+      nodeOverrides = { [nodeId]: dto.dataOverrides };
+    }
 
     setImmediate(() => {
       this.executionEngine.executeRun(run, nodeOverrides, retryWaves).catch((err) => {

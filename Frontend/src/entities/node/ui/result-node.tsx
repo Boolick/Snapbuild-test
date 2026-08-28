@@ -4,11 +4,13 @@ import { BaseNode } from './base-node';
 import { NODE_SCHEMAS } from '../../../shared/config/constants';
 import { NodeType, JobStatus } from '../../../shared/types/graph';
 import { CustomNodeType } from '../model/types';
+import { useWorkflowStore } from '../model/use-workflow-store';
 import { Modal, Spinner, Button } from '../../../shared/ui';
 import { Eye, Download, Maximize2, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export const ResultNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, selected }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const retryNode = useWorkflowStore((s) => s.retryNode);
   const schema = NODE_SCHEMAS[NodeType.RESULT];
   const imageUrl = data.jobOutput?.imageUrl || data.jobOutput?.previewUrl || '';
   const isRunning = data.jobStatus === JobStatus.RUNNING;
@@ -112,6 +114,7 @@ export const ResultNode: React.FC<NodeProps<CustomNodeType>> = ({ id, data, sele
         jobStatus={data.jobStatus}
         jobError={data.jobError}
         jobDurationMs={data.jobDurationMs}
+        onRetry={() => retryNode(id)}
       >
         <div className="space-y-2.5">{renderPreview()}</div>
       </BaseNode>

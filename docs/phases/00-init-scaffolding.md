@@ -26,27 +26,27 @@
 
 ## 📦 Включенные файлы
 
-| Путь к файлу                                    | Описание                                                                 |
-| ----------------------------------------------- | ------------------------------------------------------------------------ |
-| `.gitignore`                                    | Правила игнорирования `node_modules`, `.planning`, `dist`, `.env` и кэша |
-| `package.json`                                  | Корневой манифест со скриптами монорепозитория                           |
-| `docs/phases/00-init-scaffolding.md`            | Данное описание фазы инициализации                                       |
-| `backend/package.json`                          | Манифест зависимостей Nest.js бэкенда                                    |
-| `backend/package-lock.json`                     | Lock-файл зависимостей бэкенда                                           |
-| `backend/tsconfig.json`                         | Конфигурация компилятора TypeScript (NestJS)                             |
-| `backend/tsconfig.build.json`                   | Конфигурация сборки TypeScript                                           |
-| `backend/nest-cli.json`                         | Конфигурация Nest CLI                                                    |
-| `backend/.env.example`                          | Пример переменных окружения бэкенда                                      |
-| `Frontend/package.json`                         | Манифест зависимостей React фронтенда                                    |
-| `Frontend/package-lock.json`                    | Lock-файл зависимостей фронтенда                                         |
-| `Frontend/.env.example`                         | Пример переменных окружения фронтенда                                    |
-| `Frontend/tsconfig.json`                        | Конфигурация компилятора TypeScript для React                            |
-| `Frontend/tsconfig.node.json`                   | Конфигурация TypeScript для Vite конфигов                                |
-| `Frontend/vite.config.ts`                       | Конфигурация сборщика Vite                                               |
-| `Frontend/postcss.config.js`                    | Конфигурация PostCSS для TailwindCSS                                     |
-| `Frontend/tailwind.config.js`                   | Конфигурация TailwindCSS темы и утилит                                   |
-| `Frontend/index.html`                           | Точка входа SPA HTML                                                     |
-| `Frontend/src/vite-env.d.ts`                    | Декларации типов окружения Vite                                          |
+| Путь к файлу                         | Описание                                                                 |
+| ------------------------------------ | ------------------------------------------------------------------------ |
+| `.gitignore`                         | Правила игнорирования `node_modules`, `.planning`, `dist`, `.env` и кэша |
+| `package.json`                       | Корневой манифест со скриптами монорепозитория                           |
+| `docs/phases/00-init-scaffolding.md` | Данное описание фазы инициализации                                       |
+| `backend/package.json`               | Манифест зависимостей Nest.js бэкенда                                    |
+| `backend/package-lock.json`          | Lock-файл зависимостей бэкенда                                           |
+| `backend/tsconfig.json`              | Конфигурация компилятора TypeScript (NestJS)                             |
+| `backend/tsconfig.build.json`        | Конфигурация сборки TypeScript                                           |
+| `backend/nest-cli.json`              | Конфигурация Nest CLI                                                    |
+| `backend/.env.example`               | Пример переменных окружения бэкенда                                      |
+| `Frontend/package.json`              | Манифест зависимостей React фронтенда                                    |
+| `Frontend/package-lock.json`         | Lock-файл зависимостей фронтенда                                         |
+| `Frontend/.env.example`              | Пример переменных окружения фронтенда                                    |
+| `Frontend/tsconfig.json`             | Конфигурация компилятора TypeScript для React                            |
+| `Frontend/tsconfig.node.json`        | Конфигурация TypeScript для Vite конфигов                                |
+| `Frontend/vite.config.ts`            | Конфигурация сборщика Vite                                               |
+| `Frontend/postcss.config.js`         | Конфигурация PostCSS для TailwindCSS                                     |
+| `Frontend/tailwind.config.js`        | Конфигурация TailwindCSS темы и утилит                                   |
+| `Frontend/index.html`                | Точка входа SPA HTML                                                     |
+| `Frontend/src/vite-env.d.ts`         | Декларации типов окружения Vite                                          |
 
 ---
 
