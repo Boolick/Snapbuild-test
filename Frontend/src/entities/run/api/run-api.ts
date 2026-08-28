@@ -37,9 +37,11 @@ export const runApi = {
     runId: string,
     nodeId: string,
     dataOverrides?: Record<string, unknown>,
+    allNodesData?: Record<string, Record<string, unknown>>,
   ): Promise<{ runId: string; retriedNodeId: string; status: string }> => {
     const response = await apiClient.post(`/runs/${runId}/retry/${nodeId}`, {
       dataOverrides,
+      allNodesData,
     });
     return response.data;
   },

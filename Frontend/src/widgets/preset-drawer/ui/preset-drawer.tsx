@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useWorkflowStore } from '../../../entities/node/model/use-workflow-store';
 import { PresetCard } from '../../../entities/preset/ui/preset-card';
 import { Preset } from '../../../shared/types/api';
@@ -16,11 +16,20 @@ export const PresetDrawer: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPreset, setSelectedPreset] = useState<Preset | null>(null);
 
+  const targetNode = nodes.find((n) => n.id === targetNodeId);
+
+  // Synchronize selection with target node when drawer opens
+  useEffect(() => {
+    if (isOpen) {
+      const activePreset = presets.find((p) => p.id === targetNode?.data.presetId) || null;
+      setSelectedPreset(activePreset);
+      setSearchQuery('');
+    }
+  }, [isOpen, targetNodeId, targetNode?.data.presetId, presets]);
+
   if (!isOpen) {
     return null;
   }
-
-  const targetNode = nodes.find((n) => n.id === targetNodeId);
 
   const filteredPresets = presets.filter(
     (p) =>
@@ -95,9 +104,7 @@ export const PresetDrawer: React.FC = () => {
               <PresetCard
                 key={preset.id}
                 preset={preset}
-                isSelected={
-                  selectedPreset?.id === preset.id || targetNode?.data.presetId === preset.id
-                }
+                isSelected={selectedPreset?.id === preset.id}
                 onSelect={(p) => setSelectedPreset(p)}
               />
             ))

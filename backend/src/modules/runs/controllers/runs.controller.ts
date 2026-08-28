@@ -1,5 +1,15 @@
-import { Controller, Post, Get, Param, Body, Sse, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Get,
+  Param,
+  Query,
+  Body,
+  Sse,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 import { RunsService } from '../services/runs.service';
 import { RunEventsService } from '../services/run-events.service';
@@ -55,14 +65,22 @@ export class RunsController {
   @ApiOperation({
     summary: 'Server-Sent Events (SSE) stream for real-time node state transitions',
   })
+  @ApiQuery({
+    name: 'since',
+    required: false,
+    description: 'Optional ISO timestamp to only receive events emitted after this time',
+  })
   @ApiResponse({
     status: 200,
     description: 'SSE stream (text/event-stream)',
   })
-  streamRunEvents(@Param('id') id: string): Observable<MessageEvent> {
+  streamRunEvents(
+    @Param('id') id: string,
+    @Query('since') since?: string,
+  ): Observable<MessageEvent> {
     // Verify run exists
     this.runsService.getRunById(id);
-    return this.eventsService.subscribeToRun(id);
+    return this.eventsService.subscribeToRun(id, since);
   }
 
   @Post(':id/retry/:nodeId')

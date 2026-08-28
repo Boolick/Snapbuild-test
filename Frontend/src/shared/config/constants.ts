@@ -67,3 +67,16 @@ export const NODE_SCHEMAS: Record<NodeType, NodeSchema> = {
     accentColor: '#10b981',
   },
 };
+
+export const WORKFLOW_LIMITS = {
+  MAX_TOTAL_NODES: 30,
+  MAX_TOTAL_EDGES: 60,
+  MAX_HEAVY_NODES: 10,
+  MAX_NODES_PER_TYPE: {
+    [NodeType.PROMPT]: 10,
+    [NodeType.IMAGE_INPUT]: 10,
+    [NodeType.GENERATE_IMAGE]: 6,
+    [NodeType.EDIT_IMAGE]: 6,
+    [NodeType.RESULT]: 10,
+  },
+};

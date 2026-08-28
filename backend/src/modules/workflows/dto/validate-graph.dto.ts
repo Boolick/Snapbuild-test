@@ -1,17 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, ValidateNested } from 'class-validator';
+import { IsArray, ValidateNested, ArrayMaxSize } from 'class-validator';
 import { Type } from 'class-transformer';
 import { WorkflowNodeDto, WorkflowEdgeDto } from './create-workflow.dto';
+import { WORKFLOW_LIMITS } from '../domain/workflow-limits.constants';
 
 export class ValidateGraphDto {
-  @ApiProperty({ type: [WorkflowNodeDto] })
+  @ApiProperty({ type: [WorkflowNodeDto], maxItems: WORKFLOW_LIMITS.MAX_TOTAL_NODES })
   @IsArray()
+  @ArrayMaxSize(WORKFLOW_LIMITS.MAX_TOTAL_NODES)
   @ValidateNested({ each: true })
   @Type(() => WorkflowNodeDto)
   nodes: WorkflowNodeDto[];
 
-  @ApiProperty({ type: [WorkflowEdgeDto] })
+  @ApiProperty({ type: [WorkflowEdgeDto], maxItems: WORKFLOW_LIMITS.MAX_TOTAL_EDGES })
   @IsArray()
+  @ArrayMaxSize(WORKFLOW_LIMITS.MAX_TOTAL_EDGES)
   @ValidateNested({ each: true })
   @Type(() => WorkflowEdgeDto)
   edges: WorkflowEdgeDto[];
@@ -23,7 +26,9 @@ export class ValidationErrorDetail {
     | 'INCOMPATIBLE_PORTS'
     | 'UNKNOWN_NODE'
     | 'MISSING_REQUIRED_INPUT'
-    | 'INVALID_PORT';
+    | 'INVALID_PORT'
+    | 'MULTIPLE_INPUTS_TO_PORT'
+    | 'LIMIT_EXCEEDED';
   message: string;
   nodeId?: string;
   edgeId?: string;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { NodePort, PortType, JobStatus } from '../../../shared/types/graph';
 import { NodeStatusBadge } from '../../run/ui/node-status-badge';
@@ -17,7 +17,7 @@ export interface BaseNodeProps {
   jobStatus?: JobStatus;
   jobError?: string;
   jobDurationMs?: number;
-  onRetry?: () => void;
+  onRetry?: () => void | Promise<void>;
   children: React.ReactNode;
 }
 
@@ -48,7 +48,21 @@ export const BaseNode: React.FC<BaseNodeProps> = ({
   onRetry,
   children,
 }) => {
+  const [isRetrying, setIsRetrying] = useState(false);
   const deleteNode = useWorkflowStore((s) => s.deleteNode);
+
+  const handleRetryClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!onRetry || isRetrying) {
+      return;
+    }
+    try {
+      setIsRetrying(true);
+      await onRetry();
+    } finally {
+      setIsRetrying(false);
+    }
+  };
 
   const getHandleStyle = (portType: PortType) => ({
     width: '12px',
@@ -174,13 +188,12 @@ export const BaseNode: React.FC<BaseNodeProps> = ({
             </p>
             {onRetry && (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRetry();
-                }}
-                className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-rose-600 hover:bg-rose-500 px-2.5 py-1 rounded transition-colors"
+                onClick={handleRetryClick}
+                disabled={isRetrying}
+                className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold text-white bg-rose-600 hover:bg-rose-500 disabled:opacity-60 px-2.5 py-1 rounded transition-all active:scale-95 cursor-pointer shadow-sm"
               >
-                <RotateCw size={11} /> Retry this node
+                <RotateCw size={11} className={cn(isRetrying && 'animate-spin')} />
+                {isRetrying ? 'Retrying...' : 'Retry this node'}
               </button>
             )}
           </div>

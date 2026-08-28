@@ -3,21 +3,20 @@ import {
   Connection,
   EdgeChange,
   NodeChange,
-  addEdge,
   applyEdgeChanges,
   applyNodeChanges,
 } from '@xyflow/react';
 import { CustomNodeType, CustomEdgeType } from './types';
-import {
-  NodeType,
-  JobStatus,
-  WorkflowTemplate,
-  CanvasNode,
-  NodeJobOutput,
-} from '../../../shared/types/graph';
+import { NodeType, JobStatus, WorkflowTemplate, NodeJobOutput } from '../../../shared/types/graph';
 import { Preset, WorkflowRunSnapshot } from '../../../shared/types/api';
-import { validateConnection } from '../../../shared/lib/graph/port-validator';
 import { DEFAULT_NODE_POSITIONS, INITIAL_NODE_DATA } from './initial-node-data';
+import { WORKFLOW_LIMITS } from '../../../shared/config/constants';
+import {
+  connectNodesSingleInput,
+  reconnectNodeEdge,
+  formatTemplateEdges,
+} from '../lib/node-connection-helpers';
+import { executeNodeRetry } from '../lib/node-retry-service';
 import { toast } from '../../../shared/ui';
 
 interface WorkflowState {
@@ -39,6 +38,7 @@ interface WorkflowState {
   onNodesChange: (changes: NodeChange<CustomNodeType>[]) => void;
   onEdgesChange: (changes: EdgeChange<CustomEdgeType>[]) => void;
   onConnect: (connection: Connection) => boolean;
+  onReconnect: (oldEdge: CustomEdgeType, newConnection: Connection) => boolean;
 
   addNode: (type: NodeType, position?: { x: number; y: number }) => string;
   updateNodeData: (id: string, data: Record<string, unknown>) => void;
@@ -65,7 +65,10 @@ interface WorkflowState {
     durationMs?: number,
   ) => void;
   resetAllJobStatuses: () => void;
+  retryNode: (nodeId: string) => Promise<void>;
 }
+
+import { DEFAULT_PRESETS } from '../../preset/model/default-presets';
 
 export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   nodes: [],
@@ -77,7 +80,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   activeRun: null,
   isExecuting: false,
 
-  presets: [],
+  presets: DEFAULT_PRESETS,
   isPresetDrawerOpen: false,
   targetPresetNodeId: null,
 
@@ -98,46 +101,58 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   onConnect: (connection: Connection) => {
     const { nodes, edges } = get();
-    const sourceNode = nodes.find((n) => n.id === connection.source);
-    const targetNode = nodes.find((n) => n.id === connection.target);
-
-    if (!sourceNode || !targetNode) {
-      return false;
+    const result = connectNodesSingleInput(connection, nodes, edges);
+    if (result.success && result.edges) {
+      set({ edges: result.edges });
+      return true;
     }
+    return false;
+  },
 
-    const validation = validateConnection(
-      sourceNode as unknown as CanvasNode,
-      connection.sourceHandle,
-      targetNode as unknown as CanvasNode,
-      connection.targetHandle,
-    );
-
-    if (!validation.isValid) {
-      toast.error(
-        validation.reason || 'Cannot connect incompatible port types',
-        'Incompatible Port Connection',
-      );
-      return false;
+  onReconnect: (oldEdge: CustomEdgeType, newConnection: Connection) => {
+    const { nodes, edges } = get();
+    const result = reconnectNodeEdge(oldEdge, newConnection, nodes, edges);
+    if (result.success && result.edges) {
+      set({ edges: result.edges });
+      return true;
     }
-
-    set({
-      edges: addEdge(
-        {
-          ...connection,
-          animated: true,
-          style: {
-            stroke: validation.sourceType === 'image' ? '#a78bfa' : '#60a5fa',
-            strokeWidth: 2,
-          },
-        },
-        edges,
-      ),
-    });
-
-    return true;
+    return false;
   },
 
   addNode: (type: NodeType, position) => {
+    const { nodes } = get();
+
+    if (nodes.length >= WORKFLOW_LIMITS.MAX_TOTAL_NODES) {
+      toast.error(
+        `Maximum workflow node limit reached (${WORKFLOW_LIMITS.MAX_TOTAL_NODES}). Delete some nodes to add more.`,
+        'Node Limit Reached',
+      );
+      return '';
+    }
+
+    const currentTypeCount = nodes.filter((n) => n.type === type).length;
+    const maxForType = WORKFLOW_LIMITS.MAX_NODES_PER_TYPE[type];
+    if (maxForType && currentTypeCount >= maxForType) {
+      toast.error(
+        `Maximum limit for "${type}" nodes reached (${maxForType}).`,
+        'Node Type Limit Reached',
+      );
+      return '';
+    }
+
+    if (type === NodeType.GENERATE_IMAGE || type === NodeType.EDIT_IMAGE) {
+      const heavyCount = nodes.filter(
+        (n) => n.type === NodeType.GENERATE_IMAGE || n.type === NodeType.EDIT_IMAGE,
+      ).length;
+      if (heavyCount >= WORKFLOW_LIMITS.MAX_HEAVY_NODES) {
+        toast.error(
+          `Maximum limit for AI generator/editor nodes reached (${WORKFLOW_LIMITS.MAX_HEAVY_NODES}).`,
+          'AI Operations Limit Reached',
+        );
+        return '';
+      }
+    }
+
     const id = `${type}-${Date.now().toString(36)}`;
     const newNode: CustomNodeType = {
       id,
@@ -196,11 +211,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       },
     }));
 
-    const formattedEdges: CustomEdgeType[] = template.edges.map((e) => ({
-      ...e,
-      animated: true,
-      style: { stroke: '#7d8cff', strokeWidth: 2 },
-    }));
+    const formattedEdges = formatTemplateEdges(template);
 
     set({
       nodes: formattedNodes,
@@ -283,5 +294,16 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       })),
       isExecuting: false,
     }));
+  },
+
+  retryNode: async (nodeId: string) => {
+    const state = get();
+    await executeNodeRetry(nodeId, {
+      nodes: state.nodes,
+      activeRunId: state.activeRunId,
+      setActiveRunId: state.setActiveRunId,
+      setIsExecuting: state.setIsExecuting,
+      updateNodeJob: state.updateNodeJob,
+    });
   },
 }));

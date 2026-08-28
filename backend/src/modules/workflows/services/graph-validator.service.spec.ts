@@ -125,4 +125,67 @@ describe('GraphValidatorService', () => {
     expect(result.isValid).toBe(false);
     expect(result.errors.some((e) => e.code === 'INCOMPATIBLE_PORTS')).toBe(true);
   });
+
+  it('should reject multiple edges connected to the same target input port', () => {
+    const multiInputGraph = {
+      nodes: [
+        {
+          id: 'gen-1',
+          type: NodeType.GENERATE_IMAGE,
+          position: { x: 0, y: 0 },
+          data: {},
+        },
+        {
+          id: 'edit-1',
+          type: NodeType.EDIT_IMAGE,
+          position: { x: 200, y: 0 },
+          data: {},
+        },
+        {
+          id: 'res-1',
+          type: NodeType.RESULT,
+          position: { x: 400, y: 0 },
+          data: {},
+        },
+      ],
+      edges: [
+        {
+          id: 'e1',
+          source: 'gen-1',
+          sourceHandle: 'image-out',
+          target: 'res-1',
+          targetHandle: 'image-in',
+        },
+        {
+          id: 'e2',
+          source: 'edit-1',
+          sourceHandle: 'image-out',
+          target: 'res-1',
+          targetHandle: 'image-in', // Duplicate input into res-1:image-in!
+        },
+      ],
+    };
+
+    const result = service.validate(multiInputGraph as unknown as ValidateGraphDto);
+    expect(result.isValid).toBe(false);
+    expect(result.errors.some((e) => e.code === 'MULTIPLE_INPUTS_TO_PORT')).toBe(true);
+  });
+
+  it('should reject graphs exceeding maximum node limit', () => {
+    const tooManyNodes = Array.from({ length: 35 }, (_, i) => ({
+      id: `prompt-${i}`,
+      type: NodeType.PROMPT,
+      position: { x: i * 10, y: 0 },
+      data: {},
+    }));
+
+    const excessiveGraph = {
+      nodes: tooManyNodes,
+      edges: [],
+    };
+
+    const result = service.validate(excessiveGraph as unknown as ValidateGraphDto);
+    expect(result.isValid).toBe(false);
+    expect(result.errors.some((e) => e.code === 'LIMIT_EXCEEDED')).toBe(true);
+  });
 });

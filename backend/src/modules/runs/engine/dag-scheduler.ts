@@ -82,4 +82,77 @@ export class DagScheduler {
 
     return downstream;
   }
+
+  /**
+   * Identifies all upstream prerequisite nodes of a given node (transitive ancestors).
+   */
+  static getUpstreamNodeIds(nodeId: string, edges: WorkflowEdge[]): Set<string> {
+    const upstream = new Set<string>();
+    const queue = [nodeId];
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      const incomingEdges = edges.filter((e) => e.target === current);
+      for (const edge of incomingEdges) {
+        if (!upstream.has(edge.source)) {
+          upstream.add(edge.source);
+          queue.push(edge.source);
+        }
+      }
+    }
+
+    return upstream;
+  }
+
+  /**
+   * Resolves the complete set of node IDs that must execute for a retry:
+   * 1. The target node itself.
+   * 2. Any directly or transitively upstream ancestor that is NOT in SUCCESS state or is missing outputs.
+   * 3. Any node whose data or parameters changed.
+   * 4. All downstream descendants of any node scheduled for execution.
+   */
+  static resolveRetryNodeIds(
+    targetNodeId: string,
+    graph: SchedulerGraph,
+    jobStatuses: Record<string, { status: string; outputs?: Record<string, unknown> }>,
+    changedNodeIds?: Set<string>,
+  ): Set<string> {
+    const nodesToExecute = new Set<string>([targetNodeId]);
+
+    if (changedNodeIds) {
+      for (const id of changedNodeIds) {
+        nodesToExecute.add(id);
+      }
+    }
+
+    // 1. Expand upstream: Any node that needs to run requires all its upstream dependencies to be SUCCESS.
+    // If any upstream dependency is NOT in SUCCESS (e.g. queued, error, or empty output), it MUST run too.
+    let expanded = true;
+    while (expanded) {
+      expanded = false;
+      for (const nodeId of Array.from(nodesToExecute)) {
+        const upstream = this.getUpstreamNodeIds(nodeId, graph.edges);
+        for (const upId of upstream) {
+          const job = jobStatuses[upId];
+          const hasOutput = job?.outputs && Object.keys(job.outputs).length > 0;
+          const isSuccessful = job?.status === 'success' && hasOutput;
+          if (!isSuccessful && !nodesToExecute.has(upId)) {
+            nodesToExecute.add(upId);
+            expanded = true;
+          }
+        }
+      }
+    }
+
+    // 2. Expand downstream: Any node scheduled to execute will produce new outputs,
+    // so ALL its downstream descendants MUST be re-executed as well.
+    for (const nodeId of Array.from(nodesToExecute)) {
+      const downstream = this.getDownstreamNodeIds(nodeId, graph.edges);
+      for (const downId of downstream) {
+        nodesToExecute.add(downId);
+      }
+    }
+
+    return nodesToExecute;
+  }
 }

@@ -48,6 +48,12 @@ export function useExecuteWorkflow() {
         runId: res.runId,
         onEvent: (event: RunEventMessage) => {
           switch (event.type) {
+            case 'node_queued':
+              if (event.nodeId) {
+                updateNodeJob(event.nodeId, JobStatus.QUEUED, undefined, undefined, undefined);
+              }
+              break;
+
             case 'node_started':
               if (event.nodeId) {
                 updateNodeJob(event.nodeId, JobStatus.RUNNING);

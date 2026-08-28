@@ -3,6 +3,7 @@ import { RunEventMessage } from '../types/api';
 
 export interface SseSubscriptionOptions {
   runId: string;
+  since?: string;
   onEvent: (event: RunEventMessage) => void;
   onError?: (error: unknown) => void;
   onComplete?: () => void;
@@ -10,11 +11,13 @@ export interface SseSubscriptionOptions {
 
 export function subscribeToRunEvents({
   runId,
+  since,
   onEvent,
   onError,
   onComplete,
 }: SseSubscriptionOptions): () => void {
-  const url = `${API_BASE_URL}/runs/${runId}/events`;
+  const query = since ? `?since=${encodeURIComponent(since)}` : '';
+  const url = `${API_BASE_URL}/runs/${runId}/events${query}`;
   const eventSource = new EventSource(url);
 
   const handleMessage = (event: MessageEvent) => {

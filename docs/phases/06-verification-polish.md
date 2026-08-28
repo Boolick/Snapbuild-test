@@ -50,7 +50,6 @@ Ran all test suites.
 |                  | `docs/phases/06-verification-polish.md` | Данное описание фазы                          |
 | **Тесты**        | `backend/src/**/*.spec.ts`              | Наборы автоматизированных Jest unit-тестов    |
 
-
 ---
 
 ## 🔍 Как проверить

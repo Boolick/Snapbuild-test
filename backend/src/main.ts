@@ -9,6 +9,8 @@ import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 import { TransformInterceptor } from './core/interceptors/transform.interceptor';
 import { setupSwagger } from './core/swagger/swagger.config';
 
+import { AiGatewayService } from './modules/ai/services/ai-gateway.service';
+
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule, {
@@ -16,6 +18,8 @@ async function bootstrap() {
   });
 
   const configService = app.get(ConfigService);
+  const aiGateway = app.get(AiGatewayService);
+  const activeProvider = aiGateway.getActiveProviderName();
   const port = configService.get<number>('app.port') || 4000;
   const corsOrigins = configService.get<string[]>('app.corsOrigins') || [
     'http://localhost:5173',
@@ -59,7 +63,9 @@ async function bootstrap() {
   logger.log(`====================================================`);
   logger.log(`🚀 AI Image Workflow Backend is running on: http://localhost:${port}/api/v1`);
   logger.log(`📚 Swagger API Documentation: http://localhost:${port}/api/docs`);
-  logger.log(`🎨 Active AI Provider: ${configService.get('app.aiProvider')}`);
+  logger.log(
+    `🎨 Active AI Provider: [${activeProvider}] (configured mode: "${configService.get('app.aiProvider')}")`,
+  );
   logger.log(`====================================================`);
 }
 

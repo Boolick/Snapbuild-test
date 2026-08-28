@@ -5,7 +5,6 @@ import { NODE_SCHEMAS } from '../../../shared/config/constants';
 import { NodeType } from '../../../shared/types/graph';
 import { useWorkflowStore } from '../model/use-workflow-store';
 import { CustomNodeType } from '../model/types';
-import { runApi } from '../../run/api/run-api';
 import { Sparkles, Wand2, Layers } from 'lucide-react';
 import { cn } from '../../../shared/lib/utils/cn';
 
@@ -13,24 +12,13 @@ export const GenerateImageNode: React.FC<NodeProps<CustomNodeType>> = ({ id, dat
   const updateNodeData = useWorkflowStore((s) => s.updateNodeData);
   const openPresetDrawer = useWorkflowStore((s) => s.openPresetDrawer);
   const presets = useWorkflowStore((s) => s.presets);
-  const activeRunId = useWorkflowStore((s) => s.activeRunId);
+  const retryNode = useWorkflowStore((s) => s.retryNode);
 
   const schema = NODE_SCHEMAS[NodeType.GENERATE_IMAGE];
   const currentPreset = presets.find((p) => p.id === data.presetId);
   const aspectRatio = data.aspectRatio || '1:1';
 
   const aspectRatios = ['1:1', '16:9', '9:16', '4:3'] as const;
-
-  const handleRetry = async () => {
-    if (!activeRunId) {
-      return;
-    }
-    try {
-      await runApi.retryNode(activeRunId, id);
-    } catch (err) {
-      console.error('Failed to retry node:', err);
-    }
-  };
 
   return (
     <BaseNode
@@ -44,7 +32,7 @@ export const GenerateImageNode: React.FC<NodeProps<CustomNodeType>> = ({ id, dat
       jobStatus={data.jobStatus}
       jobError={data.jobError}
       jobDurationMs={data.jobDurationMs}
-      onRetry={handleRetry}
+      onRetry={() => retryNode(id)}
     >
       <div className="space-y-3">
         {/* Preset Selector Card Trigger */}

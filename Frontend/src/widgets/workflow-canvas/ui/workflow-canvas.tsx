@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 import {
   ReactFlow,
   Background,
@@ -6,19 +6,23 @@ import {
   MiniMap,
   BackgroundVariant,
   SelectionMode,
+  Connection,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 import { useWorkflowStore } from '../../../entities/node/model/use-workflow-store';
+import { CustomEdgeType } from '../../../entities/node/model/types';
 import { PromptNode } from '../../../entities/node/ui/prompt-node';
 import { ImageInputNode } from '../../../entities/node/ui/image-input-node';
 import { GenerateImageNode } from '../../../entities/node/ui/generate-image-node';
 import { EditImageNode } from '../../../entities/node/ui/edit-image-node';
 import { ResultNode } from '../../../entities/node/ui/result-node';
+import { CustomWorkflowEdge } from '../../../entities/node/ui/custom-edge';
 import { CanvasNodePalette } from './canvas-node-palette';
 import { WORKFLOW_TEMPLATES } from '../../../features/workflow-templates/lib/templates';
 import { presetApi } from '../../../entities/preset/api/preset-api';
 import { NodeType } from '../../../shared/types/graph';
+import { toast } from '../../../shared/ui';
 
 export const WorkflowCanvas: React.FC = () => {
   const nodes = useWorkflowStore((s) => s.nodes);
@@ -26,9 +30,13 @@ export const WorkflowCanvas: React.FC = () => {
   const onNodesChange = useWorkflowStore((s) => s.onNodesChange);
   const onEdgesChange = useWorkflowStore((s) => s.onEdgesChange);
   const onConnect = useWorkflowStore((s) => s.onConnect);
+  const onReconnect = useWorkflowStore((s) => s.onReconnect);
+  const deleteEdge = useWorkflowStore((s) => s.deleteEdge);
   const setSelectedNodeId = useWorkflowStore((s) => s.setSelectedNodeId);
   const loadTemplate = useWorkflowStore((s) => s.loadTemplate);
   const setPresets = useWorkflowStore((s) => s.setPresets);
+
+  const edgeReconnectSuccessful = useRef(true);
 
   // Register Custom Node Types
   const nodeTypes = useMemo(
@@ -42,13 +50,51 @@ export const WorkflowCanvas: React.FC = () => {
     [],
   );
 
+  // Register Custom Edge Types (with interactive disconnect button)
+  const edgeTypes = useMemo(
+    () => ({
+      default: CustomWorkflowEdge,
+      custom: CustomWorkflowEdge,
+    }),
+    [],
+  );
+
+  const handleReconnectStart = useCallback(() => {
+    edgeReconnectSuccessful.current = false;
+  }, []);
+
+  const handleReconnect = useCallback(
+    (oldEdge: CustomEdgeType, newConnection: Connection) => {
+      edgeReconnectSuccessful.current = true;
+      onReconnect(oldEdge, newConnection);
+    },
+    [onReconnect],
+  );
+
+  const handleReconnectEnd = useCallback(
+    (_: MouseEvent | TouchEvent, edge: CustomEdgeType) => {
+      if (!edgeReconnectSuccessful.current) {
+        deleteEdge(edge.id);
+        toast.info('Wire disconnected', 'Connection Removed');
+      }
+      edgeReconnectSuccessful.current = true;
+    },
+    [deleteEdge],
+  );
+
   // Initial load: fetch presets and load default Scenario 3 (Branching) or Scenario 1
   useEffect(() => {
-    // 1. Fetch presets from backend
+    // 1. Fetch presets from backend with fallback
     presetApi
       .getAll()
-      .then((data) => setPresets(data))
-      .catch((err) => console.warn('Could not load presets from backend, using defaults', err));
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setPresets(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not load presets from backend, using defaults', err);
+      });
 
     // 2. Load Scenario 3 (Parallel Branching) by default if canvas is empty
     if (nodes.length === 0) {
@@ -68,13 +114,28 @@ export const WorkflowCanvas: React.FC = () => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onReconnectStart={handleReconnectStart}
+        onReconnect={
+          handleReconnect as unknown as (oldEdge: CustomEdgeType, newConnection: Connection) => void
+        }
+        onReconnectEnd={
+          handleReconnectEnd as unknown as (
+            event: MouseEvent | TouchEvent,
+            edge: CustomEdgeType,
+          ) => void
+        }
+        edgesReconnectable={true}
+        edgesFocusable={true}
+        deleteKeyCode={['Backspace', 'Delete']}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         onNodeClick={(_, node) => setSelectedNodeId(node.id)}
         onPaneClick={() => setSelectedNodeId(null)}
         fitView
         selectionMode={SelectionMode.Partial}
         proOptions={{ hideAttribution: true }}
         defaultEdgeOptions={{
+          type: 'default',
           animated: true,
           style: { stroke: '#7d8cff', strokeWidth: 2 },
         }}
